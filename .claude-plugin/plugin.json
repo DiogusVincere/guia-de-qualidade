@@ -1,0 +1,15 @@
+{
+  "name": "guia-de-qualidade",
+  "description": "Regras e listas de verificação em português para agentes de código: segurança web e de APIs, autenticação, segredos, dados pessoais (LGPD), QA e testes, dependências e CI, acessibilidade, performance, deploy, desktop em Python, Flutter e automações com certificado digital. Skills /revisar-seguranca, /qa-antes-de-entregar e /checklist-de-entrega. Nenhuma ponta solta sem registro.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Diogo Vieira de Lima"
+  },
+  "skills": [
+    "./skills/"
+  ],
+  "homepage": "https://github.com/DiogusVincere/guia-de-qualidade",
+  "repository": "https://github.com/DiogusVincere/guia-de-qualidade",
+  "license": "MIT",
+  "keywords": ["seguranca", "qa", "checklist", "owasp", "lgpd", "portugues"]
+}

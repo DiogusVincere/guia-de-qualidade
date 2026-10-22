@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "guia-de-qualidade",
+  "description": "Guia de qualidade para agentes de código: segurança, QA, dados pessoais, dependências, deploy, desktop, mobile e automações, em português.",
+  "owner": {
+    "name": "Diogo Vieira de Lima"
+  },
+  "plugins": [
+    {
+      "name": "guia-de-qualidade",
+      "version": "1.0.0",
+      "description": "Regras inegociáveis, treze listas de verificação com como-verificar e como-corrigir, e três skills: /revisar-seguranca, /qa-antes-de-entregar, /checklist-de-entrega.",
+      "category": "security",
+      "source": "./"
+    }
+  ]
+}

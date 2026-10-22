@@ -1,0 +1,30 @@
+name: conferir
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Conferir o guia (itens, ids, links, manifestos, skills)
+        run: python ferramentas/conferir.py
+
+      - name: Nenhum termo proibido (empresa, cliente, pessoa real, dado pessoal)
+        env:
+          # lista do escritório e dos clientes, separada por vírgula; fica em Settings > Secrets, nunca no código
+          TERMOS_PROIBIDOS: ${{ secrets.TERMOS_PROIBIDOS }}
+        run: python ferramentas/conferir.py --termos
