@@ -75,14 +75,25 @@ termina.
 ## Como conectar este guia a um projeto
 
 - **Claude Code, em todos os projetos da máquina:** `/plugin marketplace add DiogusVincere/guia-de-qualidade` e
-  depois `/plugin install guia-de-qualidade@guia-de-qualidade`. As skills `/revisar-seguranca`,
-  `/qa-antes-de-entregar` e `/checklist-de-entrega` passam a existir.
+  depois `/plugin install guia-de-qualidade@guia-de-qualidade`. As skills `/revisar-seguranca` (lê o código),
+  `/testar-seguranca` (roda o scanner contra um site seu), `/qa-antes-de-entregar` e `/checklist-de-entrega`
+  passam a existir.
 - **Num repositório, para qualquer agente:** copiar este guia para `docs/guia-de-qualidade/` (ou adicionar como
   submódulo) e pôr no `AGENTS.md` do projeto a linha
   `Antes de qualquer alteração, leia e siga docs/guia-de-qualidade/AGENTS.md.` O `CLAUDE.md` do projeto pode
   importar direto: `@docs/guia-de-qualidade/AGENTS.md`. Modelo em [`modelos/AGENTS-exemplo.md`](modelos/AGENTS-exemplo.md).
 - **Num chat, sem repositório:** colar o link do arquivo bruto (`raw.githubusercontent.com/...`) deste `AGENTS.md`
   e da lista que interessa. Cada lista funciona sozinha.
+
+## Teste ativo: o scanner
+
+Além das listas (que se leem), o guia tem um scanner que **roda de verdade** contra um site, em
+[`testes-ativos/`](testes-ativos/). Ele testa TLS, cabeçalhos, cookies, arquivos e rotas expostos, XSS/SQL/
+traversal/template refletidos, autenticação e CORS, e carga. É não destrutivo: as cargas de injeção detectam a
+falha, não alteram dado. Travas que não se desligam por opção: sem declaração de autorização não roda; escrita
+nunca acontece em produção; o estresse é limitado em produção. Use pela skill `/testar-seguranca` ou direto:
+`python testes-ativos/scanner.py --alvo https://SEU-SITE --autorizo "é meu"`. Só contra um site seu ou que você
+tem permissão para testar — nunca de terceiro.
 
 ## O que este guia não é
 

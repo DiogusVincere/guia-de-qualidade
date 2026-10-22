@@ -23,6 +23,12 @@ jobs:
       - name: Conferir o guia (itens, ids, links, manifestos, skills)
         run: python ferramentas/conferir.py
 
+      - name: Instalar dependência do scanner
+        run: pip install -r testes-ativos/requirements.txt
+
+      - name: Testar o scanner contra um site de mentira vulnerável (offline)
+        run: python -m unittest testes-ativos/teste_scanner.py -v
+
       - name: Nenhum termo proibido (empresa, cliente, pessoa real, dado pessoal)
         env:
           # lista do escritório e dos clientes, separada por vírgula; fica em Settings > Secrets, nunca no código

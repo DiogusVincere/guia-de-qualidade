@@ -31,8 +31,15 @@ checklists/
   11-desktop-python.md
   12-apps-flutter.md
   13-automacoes-certificado-webservices.md
-skills/                        as listas em formato Agent Skills, para o agente carregar sob demanda
-  revisar-seguranca/
+testes-ativos/                 o scanner que roda de verdade contra um site (não destrutivo, com travas)
+  scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever
+  nucleo.py                    o alvo e as travas (autorização, produção só leitura, teto de estresse)
+  sondas.py                    tls, cabecalhos, exposicao, injecao, autenticacao, carga, login
+  relatorio.py                 relatório em Markdown por gravidade
+  teste_scanner.py             prova o scanner contra um site de mentira vulnerável, offline
+skills/                        as listas e o scanner em formato Agent Skills, carregados sob demanda
+  revisar-seguranca/           revisa o código contra as listas
+  testar-seguranca/            roda o scanner contra um site seu
   qa-antes-de-entregar/
   checklist-de-entrega/
 modelos/
@@ -52,8 +59,34 @@ ferramentas/conferir.py        valida o próprio guia (ids únicos, quatro campo
 ```
 
 Ficam disponíveis `/revisar-seguranca` (revisa o projeto ou o diff contra as listas de segurança),
-`/qa-antes-de-entregar` (percorre a lista de QA e a de pronto) e `/checklist-de-entrega` (gera o relatório de
-entrega preenchido). O agente também passa a usar as skills sozinho quando reconhece a situação.
+`/testar-seguranca` (roda o scanner de verdade contra um site seu), `/qa-antes-de-entregar` (percorre a lista de
+QA e a de pronto) e `/checklist-de-entrega` (gera o relatório de entrega preenchido). O agente também passa a usar
+as skills sozinho quando reconhece a situação.
+
+## Teste ativo contra um site (o scanner)
+
+As listas se leem; o scanner **roda**. Ele faz requisições de verdade contra uma URL e relata o que o site
+respondeu, como um pentest não destrutivo.
+
+```
+pip install -r testes-ativos/requirements.txt
+python testes-ativos/scanner.py --alvo https://SEU-SITE --autorizo "é meu" --saida relatorio.md
+```
+
+Cobre TLS e HTTPS, cabeçalhos e cookies, arquivos e rotas expostos (`/.git`, `/.env`, admin, debug, backups),
+XSS/SQL/traversal/template refletidos em cada parâmetro, autenticação e CORS, limite de requisições e carga por
+nível. O relatório sai por gravidade, com a requisição que reproduz e como corrigir.
+
+**Travas que não se desligam por opção** (em `nucleo.py`, cobertas por teste):
+
+- sem `--autorizo` não roda, e a frase vai no relatório;
+- escrita (POST/PUT/PATCH/DELETE) **nunca** em produção, mesmo com `--escrever`;
+- o estresse é limitado em produção (teto de nível 2), por mais alto que você peça;
+- as cargas de injeção são marcadores que **detectam** a falha, nunca alteram nem apagam dado.
+
+Escrita, teste de bloqueio de login e estresse alto (até nível 5) só com `--ambiente homologacao` ou `local` e
+`--escrever`. **Use só contra um site seu ou que você tem permissão para testar.** Achado é suspeita: confirme no
+código antes de concluir.
 
 **Num repositório, para qualquer agente**
 

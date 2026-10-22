@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "guia-de-qualidade",
-      "version": "1.0.0",
-      "description": "Regras inegociáveis, treze listas de verificação com como-verificar e como-corrigir, e três skills: /revisar-seguranca, /qa-antes-de-entregar, /checklist-de-entrega.",
+      "version": "1.1.0",
+      "description": "Regras inegociáveis, 14 listas de verificação com como-verificar e como-corrigir, um scanner que testa um site de verdade, e quatro skills: /revisar-seguranca, /testar-seguranca, /qa-antes-de-entregar, /checklist-de-entrega.",
       "category": "security",
       "source": "./"
     }
