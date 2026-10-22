@@ -34,7 +34,8 @@
     const corpo = {
       alvo: $('alvo').value.trim(), autorizo: $('autorizo').value.trim(), ambiente: ambiente(),
       intensidade: Number($('intensidade').value), escrever: $('escrever').checked,
-      usuario: $('usuario').value || '', senha: $('senha').value || '', config: $('config').value.trim() || ''
+      usuario: $('usuario').value || '', senha: $('senha').value || '', config: $('config').value.trim() || '',
+      codigo: $('codigo').value.trim() || ''
     };
     try { await api('/api/testar', { method: 'POST', json: corpo }); acompanhar(); }
     catch (err) { toast(err.message, 'erro'); }
@@ -135,7 +136,16 @@
   });
   window.addEventListener('beforeunload', (e) => { if (ocupado) { e.preventDefault(); e.returnValue = ''; } });
 
+  function renderCapacidades(cap) {
+    if (!cap) return;
+    $('capacidades').innerHTML = Object.keys(cap).map((nome) =>
+      '<span class="cap ' + (cap[nome] ? 'cap--on' : 'cap--off') + '" title="' +
+      (cap[nome] ? 'instalada: será usada' : 'não instalada: o scanner avisa como instalar') + '">' +
+      (cap[nome] ? '●' : '○') + ' ' + escapar(nome) + '</span>').join('');
+  }
+
   api('/api/estado').then((est) => {
+    renderCapacidades(est.capacidades);
     if (est.trabalho && est.trabalho.concluido && est.trabalho.resultado) { $('vazio').hidden = true; mostrar(est.trabalho.resultado); }
     else if (est.trabalho) acompanhar();
   }).catch(() => {});

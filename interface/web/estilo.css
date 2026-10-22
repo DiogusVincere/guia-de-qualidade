@@ -69,3 +69,9 @@ code { font-family: var(--mono); background: #0b0e14; padding: 1px 5px; border-r
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--borda); padding: 12px 18px; border-radius: 10px; z-index: 20; }
 .toast--erro { border-color: var(--vermelho); color: #ffb4ad; }
 .encerrado { text-align: center; padding: 100px 20px; }
+
+/* ferramentas opcionais detectadas */
+.capac { margin: 8px 0 4px; }
+.cap { font-size: 12px; padding: 4px 9px; border-radius: 20px; border: 1px solid var(--borda); }
+.cap--on { color: var(--verde); border-color: #1f3a28; }
+.cap--off { color: var(--texto2); }

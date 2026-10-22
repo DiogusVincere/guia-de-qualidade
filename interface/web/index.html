@@ -47,6 +47,10 @@
           <input type="range" id="intensidade" min="1" max="5" value="2">
           <small class="texto-suave">Em produção, limitado a 2. Níveis 3–5 só em homologação/local.</small>
         </label>
+        <label class="campo"><span>Código-fonte (pasta, opcional)</span>
+          <input type="text" id="codigo" placeholder="C:\caminho\do\repositorio" autocomplete="off" spellcheck="false">
+          <small class="texto-suave">Liga as camadas de código: SAST (semgrep), segredo no git (gitleaks), dependências (osv-scanner, trivy).</small>
+        </label>
         <details class="mais">
           <summary>Homologação: escrita, login e lógica</summary>
           <label class="campo campo--check"><input type="checkbox" id="escrever"> <span>Permitir escrita (ignorado em produção)</span></label>
@@ -59,6 +63,10 @@
         </details>
         <button type="submit" class="btn btn--primario btn--bloco" id="btn-testar">Testar segurança</button>
       </form>
+      <div class="capac">
+        <small class="texto-suave">Ferramentas opcionais detectadas nesta máquina:</small>
+        <div class="chips" id="capacidades"></div>
+      </div>
       <p class="rodape-form texto-suave">Cada achado é uma suspeita baseada no que o site respondeu. Confirme no código antes de concluir.</p>
     </section>
 

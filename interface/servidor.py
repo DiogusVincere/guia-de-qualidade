@@ -81,6 +81,22 @@ class Trabalho:
         self.fim = time.time()
 
 
+def capacidades() -> dict:
+    """Quais ferramentas opcionais estão instaladas nesta máquina, para a página mostrar o que está ligado."""
+    import importlib.util
+    import shutil
+    bin_ok = lambda *nomes: any(shutil.which(n) for n in nomes)  # noqa: E731
+    return {
+        'nuclei': bin_ok('nuclei'),
+        'semgrep': bin_ok('semgrep'),
+        'gitleaks': bin_ok('gitleaks'),
+        'osv-scanner': bin_ok('osv-scanner'),
+        'trivy': bin_ok('trivy'),
+        'testssl.sh': bin_ok('testssl.sh', 'testssl'),
+        'playwright (DOM)': importlib.util.find_spec('playwright') is not None,
+    }
+
+
 def _achado_json(a) -> dict:
     return {'sonda': a.sonda, 'item': a.item, 'titulo': a.titulo, 'gravidade': a.gravidade, 'url': a.url,
             'evidencia': a.evidencia, 'explicacao': a.explicacao, 'correcao': a.correcao, 'reproduzir': a.reproduzir}
@@ -233,7 +249,8 @@ class Tratador(BaseHTTPRequestHandler):
                 desde = int(dict(p.split('=', 1) for p in urlparse(self.path).query.split('&') if '=' in p).get('desde', 0))
             t = self.server.trabalho
             return self._json(200, {'versao': VERSAO, 'ocupado': self.server.ocupado(),
-                                    'sondas': [n for n, _ in sondas.SONDAS], 'trabalho': t.estado(desde) if t else None})
+                                    'sondas': [n for n, _ in sondas.SONDAS], 'capacidades': capacidades(),
+                                    'trabalho': t.estado(desde) if t else None})
         if caminho == '/api/baixar':
             t = self.server.trabalho
             if not (t and t.markdown):
