@@ -521,6 +521,9 @@ def limite_de_login(alvo: Alvo) -> list[Achado]:
 
 
 from rastreio import rastrear, segredos_no_cliente       # noqa: E402
+from navegador import rastreio_navegador                 # noqa: E402
+from descoberta import descoberta_ativa                  # noqa: E402
+from sondas_oast import fora_de_banda                    # noqa: E402
 from autenticado import varredura_autenticada            # noqa: E402
 from logica import testes_de_logica                      # noqa: E402
 from nuclei_ponte import rodar_nuclei                    # noqa: E402
@@ -533,14 +536,17 @@ from ferramentas_externas import gitleaks, osv, semgrep, testssl, trivy  # noqa:
 # a ordem define a execução e o relatório. O crawler (rastreio) e o recon vêm antes da injeção porque a alimentam.
 SONDAS = [
     ('rastreio', rastrear),
+    ('navegador', rastreio_navegador),
     ('recon', recon_passivo),
     ('tls', tls),
     ('cabecalhos', cabecalhos),
     ('segredos', segredos_no_cliente),
     ('exposicao', exposicao),
+    ('descoberta', descoberta_ativa),
     ('metodos', metodos_http),
     ('injecao', injecao),
     ('redirecionamento', requisicoes_servidor),
+    ('oast', fora_de_banda),
     ('prototype', prototype_pollution),
     ('cliente', cliente_web),
     ('csrf', csrf),

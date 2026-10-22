@@ -35,7 +35,8 @@
       alvo: $('alvo').value.trim(), autorizo: $('autorizo').value.trim(), ambiente: ambiente(),
       intensidade: Number($('intensidade').value), escrever: $('escrever').checked,
       usuario: $('usuario').value || '', senha: $('senha').value || '', config: $('config').value.trim() || '',
-      codigo: $('codigo').value.trim() || ''
+      codigo: $('codigo').value.trim() || '',
+      oast: $('oast').checked, oast_servidor: $('oast_servidor').value.trim() || ''
     };
     try { await api('/api/testar', { method: 'POST', json: corpo }); acompanhar(); }
     catch (err) { toast(err.message, 'erro'); }

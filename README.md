@@ -46,6 +46,9 @@ testes-ativos/                 o scanner que roda de verdade contra um site (nã
   configuracao.py              estrutura do site para as sondas autenticadas (sem segredo; creds vêm do ambiente)
   sondas.py                    tls, cabecalhos, exposicao, injecao, autenticacao, carga, login
   rastreio.py                  crawler + segredos e source map no front
+  navegador.py                 rastreio por navegador de verdade (Playwright): rotas e chamadas de API do SPA
+  descoberta.py                descoberta ativa de rotas/painéis sem link, com linha de base contra o catch-all do SPA
+  oast.py + sondas_oast.py     colaborador fora-de-banda (interactsh) e a sonda de SSRF cego (--oast)
   autenticado.py               login, IDOR, mass assignment, JWT (homologação)
   logica.py                    adulteração de preço/quantidade e condição de corrida (homologação)
   sondas_rede.py               domínio/e-mail (SPF/DMARC/takeover), SSRF, open redirect, host header, métodos, GraphQL, cliente/DOM
@@ -133,12 +136,16 @@ cenários de ataque e o download do `.md`. As mesmas travas do scanner valem na 
 
 ### Sondas
 
-São 20, em ordem: `rastreio`, `tls`, `cabecalhos`, `segredos`, `exposicao`, `metodos`, `injecao`,
-`redirecionamento` (open redirect, host header, SSRF), `cliente` (SRI, tabnabbing, conteúdo misto), `dom` (XSS no
-DOM, com Playwright opcional), `graphql`, `oauth`, `websocket`, `autenticacao`, `autenticado` (IDOR, mass
-assignment, JWT), `logica` (adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`,
-`nuclei`. As rotas de saúde, login, admin e escrita são candidatos genéricos em português e inglês, ajustáveis por
-`--config`, então o scanner funciona em qualquer site seu.
+Em ordem: `rastreio`, `navegador` (rastreio por navegador de verdade, Playwright opcional), `recon`, `tls`,
+`cabecalhos`, `segredos`, `exposicao`, `descoberta` (rotas/painéis sem link), `metodos`, `injecao`,
+`redirecionamento` (open redirect, host header, SSRF), `oast` (SSRF cego pelo colaborador fora-de-banda, com
+`--oast`), `prototype`, `cliente` (SRI, tabnabbing, conteúdo misto), `csrf`, `dom` (XSS no DOM, com Playwright
+opcional), `graphql`, `oauth`, `websocket`, `autenticacao`, `autenticado` (IDOR, mass assignment, JWT), `logica`
+(adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`, e as pontes de mercado
+(`nuclei`, `semgrep`, `gitleaks`, `osv`, `trivy`, `testssl`). As rotas de saúde, login, admin e escrita são
+candidatos genéricos em português e inglês, ajustáveis por `--config`, então o scanner funciona em qualquer site
+seu. O que precisa de ferramenta não instalada (Playwright, cryptography, nuclei, ...) vira um aviso dizendo como
+ligar, nunca um silêncio.
 
 **Num repositório, para qualquer agente**
 

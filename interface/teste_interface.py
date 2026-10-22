@@ -124,7 +124,7 @@ class TestInterface(unittest.TestCase):
         # a página lê isto no carregamento; o /api/estado é consultado a cada segundo e não pode recomputar
         _, est = self.pedir('GET', '/api/estado')
         self.assertIn('capacidades', est)
-        self.assertIn('playwright (DOM)', est['capacidades'])
+        self.assertIn('playwright (navegador/DOM)', est['capacidades'])
         self.assertIs(iface.capacidades(), iface.capacidades())   # lru_cache: mesmo objeto, calculado uma vez
 
     def test_07_encerrar(self):

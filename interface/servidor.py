@@ -98,7 +98,8 @@ def capacidades() -> dict:
         'osv-scanner': bin_ok('osv-scanner'),
         'trivy': bin_ok('trivy'),
         'testssl.sh': bin_ok('testssl.sh', 'testssl'),
-        'playwright (DOM)': importlib.util.find_spec('playwright') is not None,
+        'playwright (navegador/DOM)': importlib.util.find_spec('playwright') is not None,
+        'cryptography (OAST)': importlib.util.find_spec('cryptography') is not None,
     }
 
 
@@ -138,6 +139,12 @@ def rodar(trabalho: Trabalho, dados: dict):
             if not caminho.is_dir():
                 raise ValueError(f'código-fonte: a pasta "{dados["codigo"]}" não existe ou não é um diretório')
             alvo.codigo = caminho
+        if dados.get('oast'):
+            from oast import Colaborador
+            servs = [s.strip() for s in (dados.get('oast_servidor') or '').split(',') if s.strip()] or None
+            alvo.oast = Colaborador(servidores=servs)
+            trabalho.anotar('Fora-de-banda (OAST) ligado: fala com um servidor interactsh para achar SSRF cego.',
+                            'aviso')
         trabalho.anotar(f'Testando {alvo.base_url} ({ambiente}). Autorização: "{autorizo}".')
         if ambiente == 'producao':
             trabalho.anotar('Produção: só leitura; escrita e estresse alto ficam para homologação.', 'aviso')

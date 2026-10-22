@@ -48,6 +48,11 @@ def main(argv=None) -> int:
     p.add_argument('--sondas', help='só estas sondas, separadas por vírgula (rastreio,tls,cabecalhos,segredos,'
                                     'exposicao,injecao,autenticacao,autenticado,logica,carga,login,nuclei)')
     p.add_argument('--pausa', type=float, default=0.0, help='segundos de pausa entre requisições (gentileza)')
+    p.add_argument('--oast', action='store_true',
+                   help='liga o colaborador fora-de-banda (interactsh) para achar SSRF cego; fala com um servidor '
+                        'de terceiro (oast.pro etc.) — por isso é opcional')
+    p.add_argument('--oast-servidor', action='append', metavar='HOST',
+                   help='servidor interactsh próprio em vez dos públicos (pode repetir)')
     p.add_argument('--saida', type=Path, help='arquivo .md para gravar o relatório (além de resumir no terminal)')
     a = p.parse_args(argv)
 
@@ -64,6 +69,11 @@ def main(argv=None) -> int:
     except (Bloqueado, ValueError) as e:
         print(f'não dá para começar: {e}', file=sys.stderr)
         return 2
+
+    if a.oast or a.oast_servidor:
+        from oast import Colaborador
+        alvo.oast = Colaborador(servidores=a.oast_servidor or None)
+        print('fora-de-banda (OAST) ligado: fala com um servidor interactsh para achar SSRF cego.', file=sys.stderr)
 
     print(f'Testando {alvo.base_url} ({alvo.ambiente}). Autorização: "{a.autorizo}".', file=sys.stderr)
     if alvo.ambiente == 'producao':

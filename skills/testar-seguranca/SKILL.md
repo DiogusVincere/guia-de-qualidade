@@ -34,13 +34,19 @@ python ${CLAUDE_PLUGIN_ROOT}/testes-ativos/scanner.py --alvo https://SITE --auto
 
 Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produção limitada a 2), `--escrever`
 (ignorado em produção), `--pausa SEGUNDOS` (gentileza entre requisições), `--sondas` (lista), `--saida`
-(arquivo .md). O scanner sai com código 1 quando há achado crítico ou alto.
+(arquivo .md), `--oast` (liga o fora-de-banda para SSRF cego; fala com um servidor interactsh de terceiro, por
+isso é opcional; `--oast-servidor HOST` aponta um próprio). O scanner sai com código 1 quando há achado crítico ou alto.
+
+O rastreio por navegador e o DOM XSS usam o Playwright se estiver instalado (`pip install playwright && playwright
+install chromium`); o fora-de-banda usa `cryptography`. Sem eles, cada um vira um aviso dizendo o que falta, como o nuclei.
 
 ## O que o scanner cobre
 
 | Sonda | O que faz |
 |---|---|
 | rastreio | segue links, sitemap e robots, e vasculha o JS atrás de rotas de API escondidas; alimenta a injeção |
+| navegador | abre um navegador de verdade (Playwright), roda o JS e recolhe as rotas/chamadas de API do SPA que o HTML cru não mostra; se não tiver Playwright, avisa |
+| descoberta | procura rotas e painéis sem link (dirbusting enxuto) com linha de base para não cair no catch-all do SPA; marca swagger/actuator/debug e alimenta a injeção |
 | recon | subdomínios pelo crt.sh e URLs antigas pelo Wayback; os parâmetros antigos entram para a injeção |
 | tls | protocolo negociado, TLS 1.0/1.1 aceitos, HSTS (em todas as respostas), certificado |
 | cabecalhos | CSP (e unsafe-inline em script-src), nosniff, Referrer-Policy, clickjacking, cookies, versão vazando |
@@ -49,6 +55,7 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 | metodos | métodos HTTP perigosos habilitados (PUT, DELETE, TRACE, CONNECT) |
 | injecao | XSS refletido, erro de SQL, traversal, template e entrada longa que derruba, em cada parâmetro descoberto |
 | redirecionamento | open redirect, host header injection e indício de SSRF (metadado de nuvem) |
+| oast | falhas CEGAS pelo colaborador fora-de-banda (interactsh): SSRF cego e envenenamento de Host, confirmados quando o servidor do alvo toca um endereço meu; só com `--oast` (fala com um servidor de terceiro) |
 | cliente | script externo sem SRI, tabnabbing (target=_blank sem noopener), conteúdo misto http em página https |
 | graphql | introspection ligado (esquema inteiro visível) |
 | autenticacao | API de admin sem sessão (crítico), página /admin sem barreira (confirme), saúde vazando, CORS de outra origem — rotas genéricas PT e EN |

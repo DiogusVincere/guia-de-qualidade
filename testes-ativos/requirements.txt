@@ -1,4 +1,7 @@
 # Dependências do scanner
 requests>=2.31
-# opcional: navegador sem tela para XSS no DOM (sonda 'dom'). Sem ele, a sonda avisa e segue.
+# opcional: navegador sem tela para o rastreio do SPA e o XSS no DOM (sondas 'navegador' e 'dom').
+# Sem ele, as duas avisam e seguem.
 # playwright>=1.40   # depois: playwright install chromium
+# opcional: colaborador fora-de-banda (OAST, sonda 'oast') para achar SSRF cego. Sem ele, a sonda avisa.
+# cryptography>=42
