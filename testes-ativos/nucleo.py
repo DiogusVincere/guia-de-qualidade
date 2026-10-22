@@ -102,6 +102,7 @@ class Alvo:
         self.sessao.headers['User-Agent'] = user_agent
         self.sessao.max_redirects = 5
         self.config = config                        # estrutura do site (rotas de admin, pedido, IDOR); sem segredos
+        self.codigo = None                          # caminho do código-fonte local (SAST, segredos no git, SCA)
         self.autenticada = False                    # vira True depois de um login bem-sucedido (entrar)
         # preenchido pelo crawler e lido pela injeção; data, não lógica
         self.descobertas = {'rotas': set(), 'parametros': set(), 'js': [], 'formularios': []}

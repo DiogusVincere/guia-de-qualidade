@@ -39,6 +39,8 @@ def main(argv=None) -> int:
     p.add_argument('--escrever', action='store_true',
                    help='permite requisições de escrita, varredura autenticada, lógica e login (ignorado em produção)')
     p.add_argument('--intensidade', type=int, default=2, help='nível de carga 1 a 5 (produção é limitada a 2)')
+    p.add_argument('--codigo', type=Path, help='pasta do código-fonte local, para as ferramentas de SAST, segredo '
+                                               'no git e SCA (semgrep, gitleaks, osv-scanner, trivy)')
     p.add_argument('--config', type=Path, help='JSON com a estrutura do site (login, rotas de admin, IDOR, pedido); '
                                                'sem segredo — ver exemplos/alvo.exemplo.json')
     p.add_argument('--usuario', help='usuário para a varredura autenticada (ou a variável SCANNER_USUARIO)')
@@ -58,6 +60,7 @@ def main(argv=None) -> int:
     try:
         alvo = Alvo(a.alvo, a.ambiente, a.intensidade, autorizado=True,
                     permitir_escrita=a.escrever, pausa=a.pausa, config=config)
+        alvo.codigo = a.codigo
     except (Bloqueado, ValueError) as e:
         print(f'não dá para começar: {e}', file=sys.stderr)
         return 2

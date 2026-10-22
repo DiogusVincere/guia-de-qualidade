@@ -37,6 +37,9 @@ checklists/
   17-criptografia.md
   18-dominio-e-email.md
   19-cliente-e-dom.md
+  20-camadas-e-ferramentas.md
+  21-injecao-avancada-e-protocolo.md
+  22-logs-monitoramento-e-resposta.md
 testes-ativos/                 o scanner que roda de verdade contra um site (não destrutivo, com travas)
   scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever, --config
   nucleo.py                    o alvo e as travas (autorização, produção só leitura, teto de estresse)
@@ -47,6 +50,8 @@ testes-ativos/                 o scanner que roda de verdade contra um site (nã
   logica.py                    adulteração de preço/quantidade e condição de corrida (homologação)
   sondas_rede.py               domínio/e-mail (SPF/DMARC/takeover), SSRF, open redirect, host header, métodos, GraphQL, cliente/DOM
   sondas_app.py                OAuth/SSO, WebSocket (CSWSH) e XSS no DOM (com Playwright opcional)
+  sondas_recon.py              recon passivo (crt.sh, Wayback), CSRF e prototype pollution
+  ferramentas_externas.py      pontes para semgrep (SAST), gitleaks (segredo no git), osv-scanner/trivy (SCA), testssl.sh
   nuclei_ponte.py              varredura ampla pelo nuclei, se instalado
   cenarios.py                  "como um atacante usaria isto": encadeia os achados
   relatorio.py                 relatório em Markdown por gravidade, com os cenários

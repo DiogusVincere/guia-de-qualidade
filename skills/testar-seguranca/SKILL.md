@@ -41,6 +41,7 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 | Sonda | O que faz |
 |---|---|
 | rastreio | segue links, sitemap e robots, e vasculha o JS atrás de rotas de API escondidas; alimenta a injeção |
+| recon | subdomínios pelo crt.sh e URLs antigas pelo Wayback; os parâmetros antigos entram para a injeção |
 | tls | protocolo negociado, TLS 1.0/1.1 aceitos, HSTS (em todas as respostas), certificado |
 | cabecalhos | CSP (e unsafe-inline em script-src), nosniff, Referrer-Policy, clickjacking, cookies, versão vazando |
 | segredos | chave de API, token, credencial e source map (.js.map) expostos no front |
@@ -60,6 +61,13 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 | carga | p50/p95 sob carga do nível escolhido e se aparece 429 (sinal de limite) |
 | login | bloqueio por tentativa repetida — só em homologação com `--escrever` |
 | nuclei | varredura ampla com o nuclei, se instalado (milhares de testes); sem ele, avisa como instalar |
+| semgrep/gitleaks/osv/trivy | SAST, segredo no git e SCA — rodam sobre o código com `--codigo <pasta>`, se instalados |
+| testssl | TLS a fundo pelo testssl.sh, se instalado |
+
+Além do DAST (testar o site), passe `--codigo <pasta do repositório>` para ligar as camadas de **SAST** (semgrep),
+**segredo no histórico do git** (gitleaks) e **SCA/dependências** (osv-scanner, trivy) — cada uma roda se a
+ferramenta estiver instalada, senão avisa como instalar. É o ferramental que um profissional combina; ver a
+checklist `20-camadas-e-ferramentas.md`.
 
 Tem **interface local** (uma página no navegador) para quem prefere clicar em vez de linha de comando:
 `python ${CLAUDE_PLUGIN_ROOT}/interface/servidor.py` abre em `http://127.0.0.1:8771/` com formulário de URL,

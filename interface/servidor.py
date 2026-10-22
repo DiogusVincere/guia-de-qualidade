@@ -112,6 +112,8 @@ def rodar(trabalho: Trabalho, dados: dict):
         trabalho.fase = 'preparando'
         alvo = Alvo(dados.get('alvo') or '', ambiente, intensidade, autorizado=True,
                     permitir_escrita=escrever, pausa=float(dados.get('pausa') or 0.02), config=config)
+        if dados.get('codigo'):
+            alvo.codigo = Path(dados['codigo'])
         trabalho.anotar(f'Testando {alvo.base_url} ({ambiente}). Autorização: "{autorizo}".')
         if ambiente == 'producao':
             trabalho.anotar('Produção: só leitura; escrita e estresse alto ficam para homologação.', 'aviso')

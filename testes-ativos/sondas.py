@@ -527,10 +527,13 @@ from nuclei_ponte import rodar_nuclei                    # noqa: E402
 from sondas_rede import (cliente_web, dominio_email, graphql, metodos_http,  # noqa: E402
                          requisicoes_servidor)
 from sondas_app import dom_xss, oauth_sso, websocket     # noqa: E402
+from sondas_recon import csrf, prototype_pollution, recon_passivo  # noqa: E402
+from ferramentas_externas import gitleaks, osv, semgrep, testssl, trivy  # noqa: E402
 
-# a ordem define a execução e o relatório. O crawler (rastreio) vem antes da injeção porque a alimenta.
+# a ordem define a execução e o relatório. O crawler (rastreio) e o recon vêm antes da injeção porque a alimentam.
 SONDAS = [
     ('rastreio', rastrear),
+    ('recon', recon_passivo),
     ('tls', tls),
     ('cabecalhos', cabecalhos),
     ('segredos', segredos_no_cliente),
@@ -538,7 +541,9 @@ SONDAS = [
     ('metodos', metodos_http),
     ('injecao', injecao),
     ('redirecionamento', requisicoes_servidor),
+    ('prototype', prototype_pollution),
     ('cliente', cliente_web),
+    ('csrf', csrf),
     ('dom', dom_xss),
     ('graphql', graphql),
     ('oauth', oauth_sso),
@@ -549,7 +554,13 @@ SONDAS = [
     ('dominio', dominio_email),
     ('carga', carga),
     ('login', limite_de_login),
+    # ferramentas de mercado (opcionais, como o nuclei): ligam se instaladas
     ('nuclei', rodar_nuclei),
+    ('semgrep', semgrep),
+    ('gitleaks', gitleaks),
+    ('osv', osv),
+    ('trivy', trivy),
+    ('testssl', testssl),
 ]
 
 

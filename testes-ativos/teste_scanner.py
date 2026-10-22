@@ -273,6 +273,37 @@ class TestAutenticadoELogica(BaseServidor):
         self.assertTrue(all(a.gravidade == 'info' for a in achados))
 
 
+class TestReconEFerramentas(BaseServidor):
+    def test_recon_nao_chama_rede_em_localhost(self):
+        import sondas_recon
+        achados = sondas_recon.recon_passivo(self.alvo())      # alvo é 127.0.0.1: não toca a internet
+        self.assertEqual(len(achados), 1)
+        self.assertEqual(achados[0].gravidade, 'info')
+        self.assertIn('localhost', achados[0].titulo.lower() + achados[0].evidencia.lower())
+
+    def test_csrf_formulario_sem_token(self):
+        import sondas_recon
+        alvo = self.alvo()
+        alvo.descobertas['formularios'] = [('/entrar', ['email', 'senha'])]   # sem token, servidor sem SameSite
+        itens = self.itens(sondas_recon.csrf(alvo))
+        self.assertIn('WEB-03', itens)
+
+    def test_ferramentas_externas_avisam_sem_codigo_e_sem_binario(self):
+        import ferramentas_externas as fe
+        alvo = self.alvo()
+        for sonda in (fe.semgrep, fe.gitleaks, fe.osv, fe.trivy):
+            a = sonda(alvo)[0]
+            self.assertEqual(a.gravidade, 'info')
+            self.assertIn('código', a.titulo.lower())        # precisa de --codigo
+        import shutil
+        alvo.codigo = '.'
+        for sonda, binario in ((fe.gitleaks, 'gitleaks'), (fe.osv, 'osv-scanner'), (fe.trivy, 'trivy')):
+            if shutil.which(binario):
+                continue                                       # instalado nesta máquina: não dá para prever info
+            a = sonda(alvo)[0]
+            self.assertEqual(a.gravidade, 'info')             # binário ausente: info, nunca derruba
+
+
 class TestCenarios(BaseServidor):
     def test_cenarios_encadeiam(self):
         achados = [Achado('x', 'WEB-05', 'xss', 'critico', 'u', 'e', 'p', 'c'),
