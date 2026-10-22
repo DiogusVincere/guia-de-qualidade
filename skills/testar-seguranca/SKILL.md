@@ -40,13 +40,23 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 
 | Sonda | O que faz |
 |---|---|
+| rastreio | segue links, sitemap e robots, e vasculha o JS atrás de rotas de API escondidas; alimenta a injeção |
 | tls | protocolo negociado, TLS 1.0/1.1 aceitos, HSTS, certificado |
-| cabecalhos | CSP (e unsafe-inline em script-src), nosniff, Referrer-Policy, clickjacking, cookies (Secure/HttpOnly/SameSite), versão vazando |
-| exposicao | `/.git`, `/.env`, `/wrangler.*`, backups, dumps, rotas de admin/debug/semeadura abertas, listagem de diretório |
-| injecao | XSS refletido, erro de SQL, traversal e injeção de template em cada parâmetro descoberto (só detecção, cargas benignas) |
-| autenticacao | rota de admin sem sessão, `/api/saude` vazando, CORS aceitando outra origem |
+| cabecalhos | CSP (e unsafe-inline em script-src), nosniff, Referrer-Policy, clickjacking, cookies, versão vazando |
+| segredos | chave de API, token, credencial e source map (.js.map) expostos no front |
+| exposicao | `/.git`, `/.env`, `/wrangler.*`, backups, dumps, rotas de debug/semeadura — só quando o CORPO é mesmo do arquivo |
+| injecao | XSS refletido, erro de SQL, traversal, template e entrada longa que derruba, em cada parâmetro descoberto |
+| autenticacao | API de admin sem sessão (crítico), página /admin sem barreira (confirme), /api/saude vazando, CORS de outra origem |
+| autenticado | login e então IDOR, mass assignment e análise de JWT — só homologação com `--escrever`, `--config` e credenciais |
+| logica | preço/quantidade adulterados e condição de corrida (vender além do estoque) — só homologação com `--escrever` |
 | carga | p50/p95 sob carga do nível escolhido e se aparece 429 (sinal de limite) |
 | login | bloqueio por tentativa repetida — só em homologação com `--escrever` |
+| nuclei | varredura ampla com o nuclei, se instalado (milhares de testes); sem ele, avisa como instalar |
+
+O relatório termina com **"Como um atacante usaria isto"**: encadeia os achados em cenários (roubo de sessão, painel
+exposto, fraude de compra) com gravidade estilo CVSS. Para a varredura autenticada e os testes de lógica, passe
+`--config` (estrutura do site, sem segredo — ver `exemplos/alvo.exemplo.json`) e as credenciais por
+`SCANNER_USUARIO`/`SCANNER_SENHA` ou `--usuario`/`--senha`.
 
 ## Passos da skill
 

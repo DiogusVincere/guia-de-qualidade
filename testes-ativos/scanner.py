@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(os.path.abspath(__file__)).parent))
 
 import relatorio as rel  # noqa: E402
 import sondas  # noqa: E402
+from configuracao import Config  # noqa: E402
 from nucleo import Alvo, Bloqueado  # noqa: E402
 
 
@@ -36,17 +37,27 @@ def main(argv=None) -> int:
     p.add_argument('--ambiente', choices=['producao', 'homologacao', 'local'], default='producao',
                    help='producao (padrão) só leitura; homologacao e local liberam escrita e estresse')
     p.add_argument('--escrever', action='store_true',
-                   help='permite requisições de escrita e o teste de bloqueio de login (ignorado em produção)')
+                   help='permite requisições de escrita, varredura autenticada, lógica e login (ignorado em produção)')
     p.add_argument('--intensidade', type=int, default=2, help='nível de carga 1 a 5 (produção é limitada a 2)')
-    p.add_argument('--sondas', help='só estas sondas, separadas por vírgula '
-                                    '(tls,cabecalhos,exposicao,injecao,autenticacao,carga,login)')
+    p.add_argument('--config', type=Path, help='JSON com a estrutura do site (login, rotas de admin, IDOR, pedido); '
+                                               'sem segredo — ver exemplos/alvo.exemplo.json')
+    p.add_argument('--usuario', help='usuário para a varredura autenticada (ou a variável SCANNER_USUARIO)')
+    p.add_argument('--senha', help='senha para a varredura autenticada (ou a variável SCANNER_SENHA; preferível)')
+    p.add_argument('--sondas', help='só estas sondas, separadas por vírgula (rastreio,tls,cabecalhos,segredos,'
+                                    'exposicao,injecao,autenticacao,autenticado,logica,carga,login,nuclei)')
     p.add_argument('--pausa', type=float, default=0.0, help='segundos de pausa entre requisições (gentileza)')
     p.add_argument('--saida', type=Path, help='arquivo .md para gravar o relatório (além de resumir no terminal)')
     a = p.parse_args(argv)
 
     try:
+        config = Config.de_arquivo(a.config).com_credenciais(a.usuario or '', a.senha or '')
+    except (ValueError, OSError) as e:
+        print(f'config inválida: {e}', file=sys.stderr)
+        return 2
+
+    try:
         alvo = Alvo(a.alvo, a.ambiente, a.intensidade, autorizado=True,
-                    permitir_escrita=a.escrever, pausa=a.pausa)
+                    permitir_escrita=a.escrever, pausa=a.pausa, config=config)
     except (Bloqueado, ValueError) as e:
         print(f'não dá para começar: {e}', file=sys.stderr)
         return 2

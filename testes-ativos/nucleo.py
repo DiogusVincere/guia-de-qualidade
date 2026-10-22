@@ -76,7 +76,7 @@ class Alvo:
 
     def __init__(self, base_url: str, ambiente: str, intensidade: int, autorizado: bool,
                  permitir_escrita: bool = False, timeout: float = 15.0, pausa: float = 0.0,
-                 user_agent: str = 'guia-de-qualidade/scanner (teste autorizado)'):
+                 config=None, user_agent: str = 'guia-de-qualidade/scanner (teste autorizado)'):
         if not autorizado:
             raise Bloqueado('o scanner só roda contra um alvo declarado como seu ou autorizado (--autorizo)')
         if ambiente not in AMBIENTES:
@@ -101,6 +101,21 @@ class Alvo:
         self.sessao = requests.Session()
         self.sessao.headers['User-Agent'] = user_agent
         self.sessao.max_redirects = 5
+        self.config = config                        # estrutura do site (rotas de admin, pedido, IDOR); sem segredos
+        self.autenticada = False                    # vira True depois de um login bem-sucedido (entrar)
+        # preenchido pelo crawler e lido pela injeção; data, não lógica
+        self.descobertas = {'rotas': set(), 'parametros': set(), 'js': [], 'formularios': []}
+
+    def mesmo_host(self, url: str) -> bool:
+        return urlparse(url).netloc in ('', self.host)
+
+    def entrar(self, caminho: str, corpo: dict) -> bool:
+        """Faz login (POST) e guarda a sessão. Só em homologação/local; devolve True se parece autenticado."""
+        r = self.requisitar('POST', caminho, json=corpo, seguir=False)
+        if r.ok and r.status in (200, 201, 204, 302):
+            tem_cookie = any(k.lower() == 'set-cookie' for k in r.cabecalhos)
+            self.autenticada = tem_cookie or r.status in (200, 204)
+        return self.autenticada
 
     # -- requisições --------------------------------------------------------------------------------------------
     def url_de(self, caminho: str) -> str:

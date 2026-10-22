@@ -32,10 +32,16 @@ checklists/
   12-apps-flutter.md
   13-automacoes-certificado-webservices.md
 testes-ativos/                 o scanner que roda de verdade contra um site (não destrutivo, com travas)
-  scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever
+  scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever, --config
   nucleo.py                    o alvo e as travas (autorização, produção só leitura, teto de estresse)
+  configuracao.py              estrutura do site para as sondas autenticadas (sem segredo; creds vêm do ambiente)
   sondas.py                    tls, cabecalhos, exposicao, injecao, autenticacao, carga, login
-  relatorio.py                 relatório em Markdown por gravidade
+  rastreio.py                  crawler + segredos e source map no front
+  autenticado.py               login, IDOR, mass assignment, JWT (homologação)
+  logica.py                    adulteração de preço/quantidade e condição de corrida (homologação)
+  nuclei_ponte.py              varredura ampla pelo nuclei, se instalado
+  cenarios.py                  "como um atacante usaria isto": encadeia os achados
+  relatorio.py                 relatório em Markdown por gravidade, com os cenários
   teste_scanner.py             prova o scanner contra um site de mentira vulnerável, offline
 skills/                        as listas e o scanner em formato Agent Skills, carregados sob demanda
   revisar-seguranca/           revisa o código contra as listas
@@ -73,9 +79,17 @@ pip install -r testes-ativos/requirements.txt
 python testes-ativos/scanner.py --alvo https://SEU-SITE --autorizo "é meu" --saida relatorio.md
 ```
 
-Cobre TLS e HTTPS, cabeçalhos e cookies, arquivos e rotas expostos (`/.git`, `/.env`, admin, debug, backups),
-XSS/SQL/traversal/template refletidos em cada parâmetro, autenticação e CORS, limite de requisições e carga por
-nível. O relatório sai por gravidade, com a requisição que reproduz e como corrigir.
+Cobre: crawler que descobre rotas (inclusive as escondidas no JavaScript), TLS e HTTPS, cabeçalhos e cookies,
+segredos e source map no front, arquivos e rotas expostos (só quando o corpo é mesmo do arquivo, sem confundir com
+a página de um SPA), XSS/SQL/traversal/template refletidos, autenticação e CORS, limite e carga por nível. Em
+homologação com `--config` e credenciais, também faz varredura autenticada (IDOR, mass assignment, JWT) e testes de
+lógica (preço/quantidade adulterados, condição de corrida). Se o `nuclei` estiver instalado, roda a varredura ampla
+dele por baixo. O relatório sai por gravidade, com a requisição que reproduz e como corrigir, e termina com **"como
+um atacante usaria isto"**, encadeando os achados em cenários.
+
+Cada achado é **suspeita**: o scanner confirma por conteúdo (um `.env` tem de ter linhas `CHAVE=valor`, não a
+página do app) e ainda assim o resultado se confere no código antes de concluir. Num site SPA no Cloudflare, por
+exemplo, `/admin` responder 200 costuma ser só o shell protegido pela API, não exposição.
 
 **Travas que não se desligam por opção** (em `nucleo.py`, cobertas por teste):
 

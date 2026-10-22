@@ -1,0 +1,32 @@
+{
+  "_comentario": "Estrutura do site para a varredura autenticada e os testes de lógica. NENHUM segredo aqui: usuário e senha vêm de --usuario/--senha ou das variáveis SCANNER_USUARIO e SCANNER_SENHA. Use só contra homologação, com dado fictício.",
+
+  "login_caminho": "/api/admin/sessao",
+  "login_campo_usuario": "email",
+  "login_campo_senha": "senha",
+  "login_campos_fixos": {},
+
+  "rotas_admin": ["/api/admin/pedidos", "/api/admin/produtos"],
+
+  "objetos_idor": [
+    { "caminho": "/api/admin/pedidos/{id}", "de": 1, "ate": 25 }
+  ],
+
+  "pedido_caminho": "/api/pedidos",
+  "pedido_corpo": {
+    "cliente": { "nome": "Cliente Exemplo", "whatsapp": "11999990000" },
+    "itens": [ { "slug": "produto-exemplo", "quantidade": 1 } ]
+  },
+  "pedido_campo_quantidade": "itens.0.quantidade",
+  "pedido_campo_preco": "",
+  "campos_proibidos": ["role", "papel", "admin", "is_admin", "perfil", "preco"],
+
+  "corrida": {
+    "corpo": {
+      "cliente": { "nome": "Cliente Exemplo", "whatsapp": "11999990000" },
+      "itens": [ { "slug": "produto-com-uma-unidade", "quantidade": 1 } ]
+    },
+    "estoque": 1,
+    "tentativas": 20
+  }
+}

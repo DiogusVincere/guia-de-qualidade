@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 
+from cenarios import montar_cenarios
 from nucleo import GRAVIDADES, Achado, Alvo
 
 TITULO_GRAVIDADE = {
@@ -43,10 +44,26 @@ def montar(alvo: Alvo, achados: list[Achado], declaracao: str) -> str:
         linhas.append(f'| {g} | {contagem[g]} |')
     linhas.append('')
     if alvo.ambiente == 'producao':
-        linhas.append('> Rodado em produção: só verificações de leitura. Escrita, estresse alto e teste de bloqueio '
-                      'de login não foram feitos aqui; rode contra homologação com `--escrever` e nível maior para '
-                      'cobrir essa parte.')
+        linhas.append('> Rodado em produção: só verificações de leitura. Escrita, estresse alto, varredura '
+                      'autenticada, teste de lógica e bloqueio de login não foram feitos aqui; rode contra '
+                      'homologação com `--escrever`, `--config` e credenciais para cobrir essa parte.')
         linhas.append('')
+
+    cenarios = montar_cenarios(achados)
+    if cenarios:
+        linhas.append('## Como um atacante usaria isto')
+        linhas.append('')
+        linhas.append('Encadeamentos possíveis a partir dos achados acima. Cada um é uma hipótese a confirmar, '
+                      'não uma invasão feita.')
+        linhas.append('')
+        for c in cenarios:
+            linhas.append(f'### {c.titulo} — {c.gravidade} (CVSS ~{c.cvss})')
+            linhas.append(f'- **O que entrega ao atacante:** {c.o_que_entrega}')
+            linhas.append('- **Como:**')
+            for passo in c.passos:
+                linhas.append(f'  1. {passo}')
+            linhas.append(f'- **Sustentado pelos achados:** {", ".join(c.base)}')
+            linhas.append('')
 
     for g in GRAVIDADES:
         do_grupo = [a for a in achados if a.gravidade == g]
