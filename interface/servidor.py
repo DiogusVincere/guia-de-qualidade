@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime as dt
+import functools
 import json
 import logging
 import os
@@ -81,8 +82,12 @@ class Trabalho:
         self.fim = time.time()
 
 
+@functools.lru_cache(maxsize=1)
 def capacidades() -> dict:
-    """Quais ferramentas opcionais estão instaladas nesta máquina, para a página mostrar o que está ligado."""
+    """Quais ferramentas opcionais estão instaladas nesta máquina, para a página mostrar o que está ligado.
+
+    Em cache: o /api/estado é consultado a cada segundo durante um teste, e a página só lê isto no
+    carregamento; sem o cache cada poll refazia 6 varreduras de PATH e um find_spec à toa."""
     import importlib.util
     import shutil
     bin_ok = lambda *nomes: any(shutil.which(n) for n in nomes)  # noqa: E731
@@ -129,7 +134,10 @@ def rodar(trabalho: Trabalho, dados: dict):
         alvo = Alvo(dados.get('alvo') or '', ambiente, intensidade, autorizado=True,
                     permitir_escrita=escrever, pausa=float(dados.get('pausa') or 0.02), config=config)
         if dados.get('codigo'):
-            alvo.codigo = Path(dados['codigo'])
+            caminho = Path(dados['codigo'])
+            if not caminho.is_dir():
+                raise ValueError(f'código-fonte: a pasta "{dados["codigo"]}" não existe ou não é um diretório')
+            alvo.codigo = caminho
         trabalho.anotar(f'Testando {alvo.base_url} ({ambiente}). Autorização: "{autorizo}".')
         if ambiente == 'producao':
             trabalho.anotar('Produção: só leitura; escrita e estresse alto ficam para homologação.', 'aviso')

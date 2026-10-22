@@ -109,7 +109,25 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(s, 200)
         self.assertIn('Relatório de teste de segurança', corpo.decode('utf-8'))
 
-    def test_04_encerrar(self):
+    def test_05_codigo_inexistente_falha(self):
+        # pasta de código que não existe: o teste termina com erro claro, não com "sem achados" em verde
+        ruim = str(Path(os.path.abspath(__file__)).parent / 'nao_existe_abc123')
+        s, resp = self.pedir('POST', '/api/testar',
+                             {'alvo': self.alvo, 'autorizo': 'é meu', 'ambiente': 'producao',
+                              'intensidade': 1, 'codigo': ruim})
+        self.assertEqual(s, 202, resp)
+        t = self.esperar()
+        self.assertIsNotNone(t['erro'])
+        self.assertIn('código', t['erro'].lower())
+
+    def test_06_capacidades_em_cache(self):
+        # a página lê isto no carregamento; o /api/estado é consultado a cada segundo e não pode recomputar
+        _, est = self.pedir('GET', '/api/estado')
+        self.assertIn('capacidades', est)
+        self.assertIn('playwright (DOM)', est['capacidades'])
+        self.assertIs(iface.capacidades(), iface.capacidades())   # lru_cache: mesmo objeto, calculado uma vez
+
+    def test_07_encerrar(self):
         outro = iface.iniciar_em_thread(porta=0)
         self.assertEqual(self.pedir_em(outro, 'POST', '/api/encerrar', {})[0], 200)
         time.sleep(0.4)
