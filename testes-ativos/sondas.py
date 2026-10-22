@@ -9,6 +9,7 @@ falta, em vez de silêncio.
 from __future__ import annotations
 
 import concurrent.futures
+import contextlib
 import re
 import secrets
 import statistics
@@ -525,6 +526,7 @@ from logica import testes_de_logica                      # noqa: E402
 from nuclei_ponte import rodar_nuclei                    # noqa: E402
 from sondas_rede import (cliente_web, dominio_email, graphql, metodos_http,  # noqa: E402
                          requisicoes_servidor)
+from sondas_app import dom_xss, oauth_sso, websocket     # noqa: E402
 
 # a ordem define a execução e o relatório. O crawler (rastreio) vem antes da injeção porque a alimenta.
 SONDAS = [
@@ -537,7 +539,10 @@ SONDAS = [
     ('injecao', injecao),
     ('redirecionamento', requisicoes_servidor),
     ('cliente', cliente_web),
+    ('dom', dom_xss),
     ('graphql', graphql),
+    ('oauth', oauth_sso),
+    ('websocket', websocket),
     ('autenticacao', autenticacao),
     ('autenticado', varredura_autenticada),
     ('logica', testes_de_logica),
@@ -548,19 +553,24 @@ SONDAS = [
 ]
 
 
-def rodar_tudo(alvo: Alvo, apenas: list[str] | None = None) -> list[Achado]:
+def rodar_tudo(alvo: Alvo, apenas: list[str] | None = None, callback=None) -> list[Achado]:
+    """Roda as sondas na ordem. `callback(nome, indice, total, achados_da_sonda)` é chamado ao fim de cada uma,
+    para a interface mostrar o andamento ao vivo."""
     todos: list[Achado] = []
-    for nome, func in SONDAS:
-        if apenas and nome not in apenas:
-            continue
+    lista = [(n, f) for n, f in SONDAS if not apenas or n in apenas]
+    for i, (nome, func) in enumerate(lista, 1):
         try:
-            todos += func(alvo)
+            novos = func(alvo)
         except Bloqueado as e:
-            todos.append(Achado(nome, 'OPS-09', f'Sonda {nome} bloqueada pela trava', 'info', alvo.base_url,
-                                str(e), 'a trava de ambiente impediu esta sonda (esperado em produção).',
-                                'rode contra homologação ou local para esta parte.'))
+            novos = [Achado(nome, 'OPS-09', f'Sonda {nome} bloqueada pela trava', 'info', alvo.base_url,
+                            str(e), 'a trava de ambiente impediu esta sonda (esperado em produção).',
+                            'rode contra homologação ou local para esta parte.')]
         except Exception as e:  # noqa: BLE001 — uma sonda não pode derrubar o scanner
-            todos.append(Achado(nome, 'OPS-06', f'Sonda {nome} falhou', 'info', alvo.base_url,
-                                f'{type(e).__name__}: {e}', 'erro inesperado na sonda.',
-                                'veja o traceback; a sonda precisa de ajuste.'))
+            novos = [Achado(nome, 'OPS-06', f'Sonda {nome} falhou', 'info', alvo.base_url,
+                            f'{type(e).__name__}: {e}', 'erro inesperado na sonda.',
+                            'veja o traceback; a sonda precisa de ajuste.')]
+        todos += novos
+        if callback:
+            with contextlib.suppress(Exception):
+                callback(nome, i, len(lista), novos)
     return todos

@@ -45,10 +45,16 @@ testes-ativos/                 o scanner que roda de verdade contra um site (nã
   rastreio.py                  crawler + segredos e source map no front
   autenticado.py               login, IDOR, mass assignment, JWT (homologação)
   logica.py                    adulteração de preço/quantidade e condição de corrida (homologação)
+  sondas_rede.py               domínio/e-mail (SPF/DMARC/takeover), SSRF, open redirect, host header, métodos, GraphQL, cliente/DOM
+  sondas_app.py                OAuth/SSO, WebSocket (CSWSH) e XSS no DOM (com Playwright opcional)
   nuclei_ponte.py              varredura ampla pelo nuclei, se instalado
   cenarios.py                  "como um atacante usaria isto": encadeia os achados
   relatorio.py                 relatório em Markdown por gravidade, com os cenários
   teste_scanner.py             prova o scanner contra um site de mentira vulnerável, offline
+interface/                     página no navegador (127.0.0.1) para rodar o scanner sem linha de comando
+  servidor.py                  python interface/servidor.py → http://127.0.0.1:8771/
+  web/                         index.html, app.js, estilo.css
+  teste_interface.py           prova a interface offline
 skills/                        as listas e o scanner em formato Agent Skills, carregados sob demanda
   revisar-seguranca/           revisa o código contra as listas
   testar-seguranca/            roda o scanner contra um site seu
@@ -107,6 +113,27 @@ exemplo, `/admin` responder 200 costuma ser só o shell protegido pela API, não
 Escrita, teste de bloqueio de login e estresse alto (até nível 5) só com `--ambiente homologacao` ou `local` e
 `--escrever`. **Use só contra um site seu ou que você tem permissão para testar.** Achado é suspeita: confirme no
 código antes de concluir.
+
+### Interface no navegador
+
+Para rodar sem linha de comando:
+
+```
+python interface/servidor.py
+```
+
+Abre `http://127.0.0.1:8771/` (só nesta máquina, com token por execução): você digita a URL, declara a
+autorização, escolhe o ambiente e o nível, e vê o andamento sonda a sonda e o relatório por gravidade, com os
+cenários de ataque e o download do `.md`. As mesmas travas do scanner valem na interface.
+
+### Sondas
+
+São 20, em ordem: `rastreio`, `tls`, `cabecalhos`, `segredos`, `exposicao`, `metodos`, `injecao`,
+`redirecionamento` (open redirect, host header, SSRF), `cliente` (SRI, tabnabbing, conteúdo misto), `dom` (XSS no
+DOM, com Playwright opcional), `graphql`, `oauth`, `websocket`, `autenticacao`, `autenticado` (IDOR, mass
+assignment, JWT), `logica` (adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`,
+`nuclei`. As rotas de saúde, login, admin e escrita são candidatos genéricos em português e inglês, ajustáveis por
+`--config`, então o scanner funciona em qualquer site seu.
 
 **Num repositório, para qualquer agente**
 

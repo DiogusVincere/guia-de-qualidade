@@ -1,1 +1,4 @@
+# Dependências do scanner
 requests>=2.31
+# opcional: navegador sem tela para XSS no DOM (sonda 'dom'). Sem ele, a sonda avisa e segue.
+# playwright>=1.40   # depois: playwright install chromium

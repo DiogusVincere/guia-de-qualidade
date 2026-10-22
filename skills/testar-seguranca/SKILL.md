@@ -53,10 +53,17 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 | autenticacao | API de admin sem sessão (crítico), página /admin sem barreira (confirme), saúde vazando, CORS de outra origem — rotas genéricas PT e EN |
 | autenticado | login e então IDOR, mass assignment e análise de JWT — só homologação com `--escrever`, `--config` e credenciais |
 | logica | preço/quantidade adulterados e condição de corrida (vender além do estoque) — só homologação com `--escrever` |
+| dom | XSS no DOM com navegador sem tela — se o Playwright estiver instalado; senão, avisa como instalar |
+| oauth | OAuth/OIDC: PKCE ausente, fluxo implícito, falta de state, redirect_uri de outro site (takeover) |
+| websocket | WebSocket sem criptografia e que aceita origem de outro site (CSWSH) |
 | dominio | SPF, DMARC e subdomínio sequestrável, via DNS sobre HTTPS (domínio próprio) |
 | carga | p50/p95 sob carga do nível escolhido e se aparece 429 (sinal de limite) |
 | login | bloqueio por tentativa repetida — só em homologação com `--escrever` |
 | nuclei | varredura ampla com o nuclei, se instalado (milhares de testes); sem ele, avisa como instalar |
+
+Tem **interface local** (uma página no navegador) para quem prefere clicar em vez de linha de comando:
+`python ${CLAUDE_PLUGIN_ROOT}/interface/servidor.py` abre em `http://127.0.0.1:8771/` com formulário de URL,
+autorização, ambiente, nível e config, andamento ao vivo e o relatório com os cenários e o download do `.md`.
 
 O relatório termina com **"Como um atacante usaria isto"**: encadeia os achados em cenários (roubo de sessão, painel
 exposto, fraude de compra) com gravidade estilo CVSS. Para a varredura autenticada e os testes de lógica, passe

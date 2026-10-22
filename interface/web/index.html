@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scanner de segurança · interface local</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1117'/%3E%3Cpath d='M32 12l16 6v10c0 11-7 18-16 22-9-4-16-11-16-22V18z' fill='none' stroke='%234fd1c5' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/estilo.css">
+  <script>window.TOKEN='__TOKEN__';window.VERSAO='__VERSAO__';</script>
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#161a24"/><path d="M32 12l16 6v10c0 11-7 18-16 22-9-4-16-11-16-22V18z" fill="none" stroke="#4fd1c5" stroke-width="4"/></svg>
+      <div><strong>Scanner de segurança</strong><small>interface local · v__VERSAO__</small></div>
+    </div>
+    <div class="topo__acoes">
+      <a class="btn btn--fantasma" href="https://github.com/DiogusVincere/guia-de-qualidade" target="_blank" rel="noopener">Guia</a>
+      <button type="button" class="btn btn--fantasma" id="btn-encerrar">Encerrar</button>
+    </div>
+  </header>
+
+  <main class="grade">
+    <section class="coluna coluna--form">
+      <div class="aviso aviso--local">
+        <strong>Só contra um site seu.</strong> Esta página roda num processo em <code>127.0.0.1</code>. Use apenas em
+        sites que você tem autorização para testar. Em produção, só leitura; escrita e estresse exigem homologação.
+      </div>
+
+      <form id="form">
+        <label class="campo"><span>URL do site</span>
+          <input type="url" id="alvo" placeholder="https://seusite.com" autocomplete="off" required>
+        </label>
+        <label class="campo"><span>Autorização</span>
+          <input type="text" id="autorizo" placeholder="é meu / tenho autorização para testar" required>
+          <small class="texto-suave">Fica registrada no relatório. Sem isso, não roda.</small>
+        </label>
+        <div class="campo">
+          <span>Ambiente</span>
+          <div class="radios">
+            <label><input type="radio" name="ambiente" value="producao" checked> Produção <small class="texto-suave">(só leitura)</small></label>
+            <label><input type="radio" name="ambiente" value="homologacao"> Homologação</label>
+            <label><input type="radio" name="ambiente" value="local"> Local</label>
+          </div>
+        </div>
+        <label class="campo"><span>Nível de carga <strong id="nivel-num">2</strong></span>
+          <input type="range" id="intensidade" min="1" max="5" value="2">
+          <small class="texto-suave">Em produção, limitado a 2. Níveis 3–5 só em homologação/local.</small>
+        </label>
+        <details class="mais">
+          <summary>Homologação: escrita, login e lógica</summary>
+          <label class="campo campo--check"><input type="checkbox" id="escrever"> <span>Permitir escrita (ignorado em produção)</span></label>
+          <label class="campo"><span>Usuário (varredura autenticada)</span><input type="text" id="usuario" autocomplete="off"></label>
+          <label class="campo"><span>Senha</span><input type="password" id="senha" autocomplete="off"></label>
+          <label class="campo"><span>Config do site (JSON, opcional)</span>
+            <textarea id="config" rows="4" placeholder='{"login_caminho":"/api/login", ...}'></textarea>
+            <small class="texto-suave">Estrutura do site para IDOR, lógica e login. Sem segredo. Ver exemplos/alvo.exemplo.json.</small>
+          </label>
+        </details>
+        <button type="submit" class="btn btn--primario btn--bloco" id="btn-testar">Testar segurança</button>
+      </form>
+      <p class="rodape-form texto-suave">Cada achado é uma suspeita baseada no que o site respondeu. Confirme no código antes de concluir.</p>
+    </section>
+
+    <section class="coluna coluna--saida">
+      <div id="vazio" class="cartao vazio">
+        <h2>O que o scanner faz</h2>
+        <p class="texto-suave">Mapeia o site, testa TLS, cabeçalhos, segredos no front, arquivos e rotas expostos, XSS/SQL/traversal, SSRF e open redirect, métodos HTTP, GraphQL, autenticação e CORS, domínio e e-mail, e carga. Em homologação, também IDOR, mass assignment, JWT e lógica de loja. Com nuclei instalado, a varredura ampla dele por baixo.</p>
+        <p class="texto-suave">O relatório sai por gravidade e termina com <strong>como um atacante usaria</strong> os achados.</p>
+      </div>
+
+      <div id="andamento" class="cartao" hidden>
+        <div class="cartao__topo"><h2>Andamento</h2><span id="fase" class="selo selo--azul">preparando</span><span id="cron" class="texto-suave"></span></div>
+        <div class="barra"><span id="barra"></span></div>
+        <pre id="log" class="log" aria-live="polite"></pre>
+        <div id="erro" class="aviso aviso--erro" hidden></div>
+      </div>
+
+      <div id="resultado" class="cartao" hidden>
+        <div class="cartao__topo"><h2>Resultado <small id="res-host" class="texto-suave"></small></h2></div>
+        <div class="totais" id="totais"></div>
+        <div class="baixar"><button type="button" id="btn-baixar" class="btn btn--primario">Baixar o relatório (.md)</button></div>
+        <div id="cenarios"></div>
+        <div class="filtros"><div class="chips" id="chips"></div></div>
+        <div id="achados"></div>
+        <div class="linha"><button type="button" class="btn btn--fantasma" id="btn-novo">Novo teste</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pe">Scanner do <a href="https://github.com/DiogusVincere/guia-de-qualidade" target="_blank" rel="noopener">guia-de-qualidade</a> · use só no que é seu · licença MIT</footer>
+  <div id="toast" class="toast" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>
