@@ -41,14 +41,19 @@ Opções: `--ambiente producao|homologacao|local`, `--intensidade 1..5` (produç
 | Sonda | O que faz |
 |---|---|
 | rastreio | segue links, sitemap e robots, e vasculha o JS atrás de rotas de API escondidas; alimenta a injeção |
-| tls | protocolo negociado, TLS 1.0/1.1 aceitos, HSTS, certificado |
+| tls | protocolo negociado, TLS 1.0/1.1 aceitos, HSTS (em todas as respostas), certificado |
 | cabecalhos | CSP (e unsafe-inline em script-src), nosniff, Referrer-Policy, clickjacking, cookies, versão vazando |
 | segredos | chave de API, token, credencial e source map (.js.map) expostos no front |
 | exposicao | `/.git`, `/.env`, `/wrangler.*`, backups, dumps, rotas de debug/semeadura — só quando o CORPO é mesmo do arquivo |
+| metodos | métodos HTTP perigosos habilitados (PUT, DELETE, TRACE, CONNECT) |
 | injecao | XSS refletido, erro de SQL, traversal, template e entrada longa que derruba, em cada parâmetro descoberto |
-| autenticacao | API de admin sem sessão (crítico), página /admin sem barreira (confirme), /api/saude vazando, CORS de outra origem |
+| redirecionamento | open redirect, host header injection e indício de SSRF (metadado de nuvem) |
+| cliente | script externo sem SRI, tabnabbing (target=_blank sem noopener), conteúdo misto http em página https |
+| graphql | introspection ligado (esquema inteiro visível) |
+| autenticacao | API de admin sem sessão (crítico), página /admin sem barreira (confirme), saúde vazando, CORS de outra origem — rotas genéricas PT e EN |
 | autenticado | login e então IDOR, mass assignment e análise de JWT — só homologação com `--escrever`, `--config` e credenciais |
 | logica | preço/quantidade adulterados e condição de corrida (vender além do estoque) — só homologação com `--escrever` |
+| dominio | SPF, DMARC e subdomínio sequestrável, via DNS sobre HTTPS (domínio próprio) |
 | carga | p50/p95 sob carga do nível escolhido e se aparece 429 (sinal de limite) |
 | login | bloqueio por tentativa repetida — só em homologação com `--escrever` |
 | nuclei | varredura ampla com o nuclei, se instalado (milhares de testes); sem ele, avisa como instalar |

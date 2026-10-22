@@ -65,8 +65,11 @@ termina.
 | Tipo de projeto | Listas obrigatórias |
 |---|---|
 | Qualquer um | [00 Antes de entregar](checklists/00-antes-de-entregar.md), [01 Segredos e configuração](checklists/01-segredos-e-configuracao.md), [06 QA e testes](checklists/06-qa-e-testes.md), [07 Dependências e CI](checklists/07-dependencias-e-ci.md) |
-| Site ou aplicação web | + [02 Segurança web](checklists/02-seguranca-web.md), [04 Autenticação e sessão](checklists/04-autenticacao-e-sessao.md), [08 Acessibilidade e celular](checklists/08-acessibilidade-e-celular.md), [09 Performance](checklists/09-performance.md), [10 Deploy e operação](checklists/10-deploy-e-operacao.md) |
-| API | + [03 APIs](checklists/03-apis.md), [04 Autenticação e sessão](checklists/04-autenticacao-e-sessao.md), [10 Deploy e operação](checklists/10-deploy-e-operacao.md) |
+| Site ou aplicação web | + [02 Segurança web](checklists/02-seguranca-web.md), [04 Autenticação e sessão](checklists/04-autenticacao-e-sessao.md), [08 Acessibilidade e celular](checklists/08-acessibilidade-e-celular.md), [09 Performance](checklists/09-performance.md), [10 Deploy e operação](checklists/10-deploy-e-operacao.md), [14 Reconhecimento e inventário](checklists/14-reconhecimento-e-inventario.md), [17 Criptografia](checklists/17-criptografia.md), [19 Cliente e DOM](checklists/19-cliente-e-dom.md) |
+| API | + [03 APIs](checklists/03-apis.md), [04 Autenticação e sessão](checklists/04-autenticacao-e-sessao.md), [10 Deploy e operação](checklists/10-deploy-e-operacao.md), [15 SSRF e requisições do servidor](checklists/15-ssrf-e-requisicoes-do-servidor.md) |
+| Recebe upload ou lê arquivo por nome | + [16 Upload e arquivos](checklists/16-upload-e-arquivos.md) |
+| Backend que faz requisição de saída (webhook, busca URL, importação) | + [15 SSRF e requisições do servidor](checklists/15-ssrf-e-requisicoes-do-servidor.md) |
+| Tem domínio próprio (e-mail, subdomínios) | + [18 Domínio e e-mail](checklists/18-dominio-e-email.md) |
 | Guarda dado de pessoa (nome, e-mail, CPF, endereço, pedido) | + [05 Dados pessoais](checklists/05-dados-pessoais.md) |
 | Aplicativo desktop em Python | + [11 Desktop em Python](checklists/11-desktop-python.md) |
 | Aplicativo Flutter | + [12 Apps Flutter](checklists/12-apps-flutter.md) |

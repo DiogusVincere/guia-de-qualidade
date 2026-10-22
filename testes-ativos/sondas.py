@@ -91,17 +91,26 @@ def tls(alvo: Alvo) -> list[Achado]:
                                   f'{versao}: {estado}', f'{versao} é obsoleto e vulnerável.',
                                   'desative TLS 1.0 e 1.1 no provedor; deixe só 1.2 e 1.3.'))
 
-    # HSTS e redirecionamento de http -> https
+    # HSTS: checa a home E uma rota de API, porque às vezes só vem em algumas respostas
     r = alvo.get('/')
     if not r.ok:
         return achados + _sem_rede('tls', r)
-    hsts = next((v for k, v in r.cabecalhos.items() if k.lower() == 'strict-transport-security'), None)
-    if not hsts:
+    saude = (alvo.config.candidatos_saude() if alvo.config else __import__('configuracao').ROTAS_SAUDE)[0]
+    outra = alvo.get(saude, seguir=False)
+    pega = lambda resp: next((v for k, v in resp.cabecalhos.items() if k.lower() == 'strict-transport-security'), None)  # noqa: E731
+    hsts = pega(r)
+    hsts_outra = pega(outra) if outra.ok else None
+    if not hsts and not hsts_outra:
         achados.append(Achado('tls', 'WEB-01', 'Sem Strict-Transport-Security (HSTS)', 'medio', alvo.base_url,
-                              'cabeçalho Strict-Transport-Security ausente.',
+                              'cabeçalho Strict-Transport-Security ausente nas respostas testadas.',
                               'sem HSTS, o primeiro acesso pode ser rebaixado para HTTP.',
-                              "adicione 'Strict-Transport-Security: max-age=31536000; includeSubDomains'.",
+                              "adicione 'Strict-Transport-Security: max-age=31536000; includeSubDomains' em todas as respostas.",
                               curl('HEAD', alvo.base_url)))
+    elif not hsts:
+        achados.append(Achado('tls', 'WEB-01', 'HSTS não está em todas as respostas (falta na home)', 'baixo',
+                              alvo.base_url, f'HSTS presente em {saude} mas ausente em /.',
+                              'o navegador só grava o HSTS quando o vê; faltando na home, o primeiro acesso não é protegido.',
+                              'aplique o HSTS no middleware que cobre todas as respostas, não só em algumas rotas.'))
     elif 'max-age=0' in hsts.replace(' ', ''):
         achados.append(Achado('tls', 'WEB-01', 'HSTS com max-age=0', 'medio', alvo.base_url,
                               f'Strict-Transport-Security: {hsts}', 'max-age=0 desliga o HSTS.',
@@ -352,16 +361,26 @@ def _parece_barreira_de_login(texto: str) -> bool:
         or 'http-equiv="refresh"' in baixo and ('entrar' in baixo or 'login' in baixo)
 
 
+def _rotas_admin_para_testar(alvo: Alvo) -> list[str]:
+    """Candidatos genéricos (PT e EN) do config, mais o que o crawler achou com 'admin'/'interno'/'private' no nome."""
+    candidatos = list(alvo.config.candidatos_admin_api()) if alvo.config else list(
+        __import__('configuracao').ROTAS_ADMIN_API)
+    for rota in sorted(alvo.descobertas.get('rotas') or set()):
+        if rota.startswith('/api') and any(p in rota for p in ('admin', 'interno', 'internal', 'private', 'usuario', 'user')):
+            candidatos.append(rota)
+    return list(dict.fromkeys(candidatos))
+
+
 def autenticacao(alvo: Alvo) -> list[Achado]:
     achados: list[Achado] = []
-    # ROTAS DE API de admin: se devolvem 200 sem sessão, é exposição de dado de verdade (crítico).
-    for caminho in ('/api/admin/pedidos', '/api/admin/produtos', '/api/admin/configuracoes'):
+    # ROTAS DE API de admin: se devolvem 200 com DADO sem sessão, é exposição de verdade (crítico). Genérico.
+    for caminho in _rotas_admin_para_testar(alvo):
         r = alvo.get(caminho, seguir=False)
-        if r.ok and r.status == 200 and ('{' in r.texto[:50] or '[' in r.texto[:50]):
+        if r.ok and r.status == 200 and r.texto.strip()[:1] in ('{', '['):
             achados.append(Achado('autenticacao', 'AUT-09', f'API de admin aberta: {caminho} responde 200 sem sessão',
                                   'critico', alvo.url_de(caminho), f'GET {caminho} sem sessão devolveu 200 com dados.',
                                   'rota de API protegida entregando dado sem login.',
-                                  'exija sessão no servidor para toda rota /api/admin; teste com usuário comum.',
+                                  'exija sessão no servidor para toda rota de admin; teste com usuário comum.',
                                   curl('GET', alvo.url_de(caminho))))
     # PÁGINA de admin (HTML): num SPA, 200 costuma ser só o shell que redireciona no cliente. Só é achado se vier
     # 200 sem nenhuma barreira de login à vista — e aí como MÉDIO "confirme", não crítico.
@@ -374,32 +393,43 @@ def autenticacao(alvo: Alvo) -> list[Achado]:
                               'ponha /admin atrás do Access/VPN; confira que a API de admin recusa sem sessão.',
                               curl('GET', alvo.url_de('/admin'))))
 
-    # /api/saude não deve vazar detalhe sem sessão
-    r = alvo.get('/api/saude')
-    if r.ok and r.status == 200:
+    # rota de saúde/status não deve vazar detalhe sem sessão (testa os nomes comuns, PT e EN)
+    candidatos_saude = alvo.config.candidatos_saude() if alvo.config else __import__('configuracao').ROTAS_SAUDE
+    for caminho in candidatos_saude:
+        r = alvo.get(caminho, seguir=False)
+        if not (r.ok and r.status == 200 and r.texto.strip()[:1] in ('{', '[')):
+            continue
         baixo = r.texto.lower()
-        for termo, o_que in (('migr', 'estado de migração'), ('tabela', 'nomes de tabela'),
-                             ('version', 'versão'), ('select', 'consulta'), ('senha', 'senha'),
-                             ('token', 'token'), ('secret', 'segredo')):
+        for termo, o_que in (('migr', 'estado de migração'), ('tabela', 'nomes de tabela'), ('table', 'nomes de tabela'),
+                             ('version', 'versão'), ('select ', 'consulta'), ('senha', 'senha'), ('password', 'senha'),
+                             ('token', 'token'), ('secret', 'segredo'), ('database', 'banco'), ('hostname', 'host interno')):
             if termo in baixo:
-                achados.append(Achado('autenticacao', 'API-10', f'/api/saude vaza {o_que} sem sessão', 'medio',
-                                      alvo.url_de('/api/saude'), f'a resposta pública contém "{termo}".',
-                                      'rota de saúde entrega detalhe interno a quem não está autenticado.',
+                achados.append(Achado('autenticacao', 'API-10', f'{caminho} vaza {o_que} sem sessão', 'medio',
+                                      alvo.url_de(caminho), f'a resposta pública contém "{termo.strip()}".',
+                                      'rota de saúde/status entrega detalhe interno a quem não está autenticado.',
                                       'devolva só ok e próximo passo para quem não é admin.'))
                 break
+        break                                   # achou uma rota de saúde que responde; não precisa testar as outras
 
-    # escrita com Origin de outro site deve ser recusada (checa, não grava — HEAD/OPTIONS)
-    for caminho in ('/api/pedidos', '/api/admin/sessao'):
+    # escrita com Origin de outro site deve ser recusada (OPTIONS, não grava)
+    escrita = (alvo.config.candidatos_escrita() if alvo.config else __import__('configuracao').ROTAS_ESCRITA)
+    testadas = 0
+    for caminho in escrita + candidatos_saude[:1]:
+        if testadas >= 6:
+            break
         r = alvo.requisitar('OPTIONS', caminho, headers={'Origin': 'https://site-invasor.exemplo',
                                                          'Access-Control-Request-Method': 'POST'}, seguir=False)
         if not r.ok:
             continue
+        testadas += 1
         permitido = next((v for k, v in r.cabecalhos.items() if k.lower() == 'access-control-allow-origin'), None)
-        if permitido and ('site-invasor.exemplo' in permitido or permitido.strip() == '*'):
+        credenciais = next((v for k, v in r.cabecalhos.items() if k.lower() == 'access-control-allow-credentials'), '')
+        if permitido and ('site-invasor.exemplo' in permitido or
+                          (permitido.strip() == '*' and credenciais.lower() == 'true')):
             achados.append(Achado('autenticacao', 'API-08', f'CORS aceita origem de outro site em {caminho}', 'alto',
                                   alvo.url_de(caminho), f'Access-Control-Allow-Origin: {permitido}',
                                   'outro site pode chamar a API com o cookie da pessoa logada.',
-                                  'permita só os domínios do seu front; nunca * com credenciais.'))
+                                  'permita só os domínios do seu front; nunca refletir a origem; nunca * com credenciais.'))
     return achados
 
 
@@ -468,11 +498,14 @@ def limite_de_login(alvo: Alvo) -> list[Achado]:
                               'força bruta de login só se testa submetendo tentativas, o que não se faz em produção.',
                               'rode o scanner contra homologação com --escrever para medir o bloqueio.'))
         return achados
-    # homologação: submete tentativas erradas e espera 429
+    # homologação: submete tentativas erradas no caminho de login do config e espera 429
+    caminho = alvo.config.login_caminho if (alvo.config and alvo.config.login_caminho) else alvo.config.candidatos_login()[0]
+    campo_u = alvo.config.login_campo_usuario if alvo.config else 'email'
+    campo_s = alvo.config.login_campo_senha if alvo.config else 'senha'
     visto_429 = False
     for i in range(15):
-        r = alvo.requisitar('POST', '/api/admin/sessao', json={'email': f'nao-existe-{i}@teste.exemplo',
-                                                               'senha': 'errada-de-proposito'}, seguir=False)
+        r = alvo.requisitar('POST', caminho, json={campo_u: f'nao-existe-{i}@teste.exemplo',
+                                                   campo_s: 'errada-de-proposito'}, seguir=False)
         if not r.ok:
             break
         if r.status == 429:
@@ -480,7 +513,7 @@ def limite_de_login(alvo: Alvo) -> list[Achado]:
             break
     if not visto_429:
         achados.append(Achado('login', 'AUT-02', 'Login sem limite de tentativas', 'alto',
-                              alvo.url_de('/api/admin/sessao'), '15 tentativas erradas sem receber 429.',
+                              alvo.url_de(caminho), '15 tentativas erradas sem receber 429.',
                               'sem limite, força bruta de senha é só questão de tempo.',
                               'conte tentativas por IP e por e-mail; reserve antes de verificar; devolva 429 com Retry-After.'))
     return achados
@@ -490,6 +523,8 @@ from rastreio import rastrear, segredos_no_cliente       # noqa: E402
 from autenticado import varredura_autenticada            # noqa: E402
 from logica import testes_de_logica                      # noqa: E402
 from nuclei_ponte import rodar_nuclei                    # noqa: E402
+from sondas_rede import (cliente_web, dominio_email, graphql, metodos_http,  # noqa: E402
+                         requisicoes_servidor)
 
 # a ordem define a execução e o relatório. O crawler (rastreio) vem antes da injeção porque a alimenta.
 SONDAS = [
@@ -498,10 +533,15 @@ SONDAS = [
     ('cabecalhos', cabecalhos),
     ('segredos', segredos_no_cliente),
     ('exposicao', exposicao),
+    ('metodos', metodos_http),
     ('injecao', injecao),
+    ('redirecionamento', requisicoes_servidor),
+    ('cliente', cliente_web),
+    ('graphql', graphql),
     ('autenticacao', autenticacao),
     ('autenticado', varredura_autenticada),
     ('logica', testes_de_logica),
+    ('dominio', dominio_email),
     ('carga', carga),
     ('login', limite_de_login),
     ('nuclei', rodar_nuclei),

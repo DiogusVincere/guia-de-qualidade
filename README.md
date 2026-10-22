@@ -31,6 +31,12 @@ checklists/
   11-desktop-python.md
   12-apps-flutter.md
   13-automacoes-certificado-webservices.md
+  14-reconhecimento-e-inventario.md
+  15-ssrf-e-requisicoes-do-servidor.md
+  16-upload-e-arquivos.md
+  17-criptografia.md
+  18-dominio-e-email.md
+  19-cliente-e-dom.md
 testes-ativos/                 o scanner que roda de verdade contra um site (não destrutivo, com travas)
   scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever, --config
   nucleo.py                    o alvo e as travas (autorização, produção só leitura, teto de estresse)
