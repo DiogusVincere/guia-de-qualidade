@@ -75,6 +75,7 @@ termina.
 | Aplicativo desktop em Python | + [11 Desktop em Python](checklists/11-desktop-python.md) |
 | Aplicativo Flutter | + [12 Apps Flutter](checklists/12-apps-flutter.md) |
 | Automação com certificado digital ou web service | + [13 Automações com certificado e web services](checklists/13-automacoes-certificado-webservices.md) |
+| Usa IA, agente, LLM, MCP ou RAG — ou o código é escrito por IA | + [23 IA, agentes e cadeia](checklists/23-ia-agentes-e-cadeia.md) |
 
 ## Como conectar este guia a um projeto
 

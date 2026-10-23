@@ -37,6 +37,12 @@ SEGREDOS = [
     (re.compile(r'(?i)(api[_-]?key|secret|token|senha|password|authorization)["\']?\s*[:=]\s*["\'][^"\']{12,}["\']'),
      'credencial embutida no código', 'alto'),
     (re.compile(r'(?i)cloudinary://[^"\'\s]+'), 'URL do Cloudinary com segredo', 'critico'),
+    # chaves de provedores de IA — chave de modelo no front é conta esvaziada (ver IA-05)
+    (re.compile(r'sk-ant-[A-Za-z0-9_\-]{20,}'), 'chave de API Anthropic', 'critico'),
+    (re.compile(r'sk-(?!ant-)(?:proj-|or-v1-)?[A-Za-z0-9]{20,}'), 'chave de API OpenAI/OpenRouter', 'critico'),
+    (re.compile(r'hf_[A-Za-z0-9]{20,}'), 'token HuggingFace', 'alto'),
+    (re.compile(r'gsk_[A-Za-z0-9]{20,}'), 'chave de API Groq', 'critico'),
+    (re.compile(r'r8_[A-Za-z0-9]{20,}'), 'token Replicate', 'alto'),
 ]
 # telltale de que o valor é de exemplo, para não gritar à toa
 FALSOS = re.compile(r'(?i)(troque-me|exemplo|example|your[_-]?key|xxxx|<[^>]+>|placeholder|dummy|changeme)')

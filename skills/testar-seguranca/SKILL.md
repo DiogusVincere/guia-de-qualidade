@@ -64,6 +64,8 @@ install chromium`); o fora-de-banda usa `cryptography`. Sem eles, cada um vira u
 | dom | XSS no DOM com navegador sem tela — se o Playwright estiver instalado; senão, avisa como instalar |
 | oauth | OAuth/OIDC: PKCE ausente, fluxo implícito, falta de state, redirect_uri de outro site (takeover) |
 | websocket | WebSocket sem criptografia e que aceita origem de outro site (CSWSH) |
+| ia | superfície de IA/agente: manifesto MCP exposto (tool poisoning), endpoints de IA, e — em homologação — canário de injeção de prompt e vazamento do prompt de sistema (OWASP LLM Top 10 2025, ver checklist 23) |
+| dependencias | slopsquatting: lê requirements/package.json/composer.json e pergunta a PyPI/npm/Packagist se cada pacote existe; nome fantasma é alvo de registro malicioso (`--codigo`) |
 | dominio | SPF, DMARC e subdomínio sequestrável, via DNS sobre HTTPS (domínio próprio) |
 | carga | p50/p95 sob carga do nível escolhido e se aparece 429 (sinal de limite) |
 | login | bloqueio por tentativa repetida — só em homologação com `--escrever` |

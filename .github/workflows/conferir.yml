@@ -32,6 +32,9 @@ jobs:
       - name: Testar as camadas novas — OAST, descoberta, navegador (offline; pula o que falta)
         run: python -m unittest testes-ativos/teste_moderno.py -v
 
+      - name: Testar as sondas de IA e cadeia — MCP, injeção de prompt, slopsquatting (offline)
+        run: python -m unittest testes-ativos/teste_ia.py -v
+
       - name: Testar a interface local (offline)
         run: python -m unittest interface/teste_interface.py -v
 

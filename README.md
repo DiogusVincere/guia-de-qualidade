@@ -40,6 +40,7 @@ checklists/
   20-camadas-e-ferramentas.md
   21-injecao-avancada-e-protocolo.md
   22-logs-monitoramento-e-resposta.md
+  23-ia-agentes-e-cadeia.md      IA, agentes, MCP, RAG e slopsquatting (OWASP LLM Top 10 2025)
 testes-ativos/                 o scanner que roda de verdade contra um site (não destrutivo, com travas)
   scanner.py                   linha de comando: --alvo, --autorizo, --ambiente, --intensidade, --escrever, --config
   nucleo.py                    o alvo e as travas (autorização, produção só leitura, teto de estresse)
@@ -54,6 +55,8 @@ testes-ativos/                 o scanner que roda de verdade contra um site (nã
   sondas_rede.py               domínio/e-mail (SPF/DMARC/takeover), SSRF, open redirect, host header, métodos, GraphQL, cliente/DOM
   sondas_app.py                OAuth/SSO, WebSocket (CSWSH) e XSS no DOM (com Playwright opcional)
   sondas_recon.py              recon passivo (crt.sh, Wayback), CSRF e prototype pollution
+  ia.py                        superfície de IA: MCP exposto, endpoint de chat, canário de injeção de prompt e vazamento do prompt (OWASP LLM)
+  dependencias.py              slopsquatting: confere se cada pacote existe no PyPI/npm/Packagist (--codigo)
   ferramentas_externas.py      pontes para semgrep (SAST), gitleaks (segredo no git), osv-scanner/trivy (SCA), testssl.sh
   nuclei_ponte.py              varredura ampla pelo nuclei, se instalado
   cenarios.py                  "como um atacante usaria isto": encadeia os achados
@@ -140,8 +143,10 @@ Em ordem: `rastreio`, `navegador` (rastreio por navegador de verdade, Playwright
 `cabecalhos`, `segredos`, `exposicao`, `descoberta` (rotas/painéis sem link), `metodos`, `injecao`,
 `redirecionamento` (open redirect, host header, SSRF), `oast` (SSRF cego pelo colaborador fora-de-banda, com
 `--oast`), `prototype`, `cliente` (SRI, tabnabbing, conteúdo misto), `csrf`, `dom` (XSS no DOM, com Playwright
-opcional), `graphql`, `oauth`, `websocket`, `autenticacao`, `autenticado` (IDOR, mass assignment, JWT), `logica`
-(adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`, e as pontes de mercado
+opcional), `graphql`, `oauth`, `websocket`, `ia` (MCP exposto, injeção de prompt e vazamento do prompt de sistema;
+OWASP LLM Top 10 2025), `autenticacao`, `autenticado` (IDOR, mass assignment, JWT), `logica`
+(adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`, `dependencias` (slopsquatting:
+confere se cada pacote existe mesmo, com `--codigo`), e as pontes de mercado
 (`nuclei`, `semgrep`, `gitleaks`, `osv`, `trivy`, `testssl`). As rotas de saúde, login, admin e escrita são
 candidatos genéricos em português e inglês, ajustáveis por `--config`, então o scanner funciona em qualquer site
 seu. O que precisa de ferramenta não instalada (Playwright, cryptography, nuclei, ...) vira um aviso dizendo como

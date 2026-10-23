@@ -531,6 +531,8 @@ from sondas_rede import (cliente_web, dominio_email, graphql, metodos_http,  # n
                          requisicoes_servidor)
 from sondas_app import dom_xss, oauth_sso, websocket     # noqa: E402
 from sondas_recon import csrf, prototype_pollution, recon_passivo  # noqa: E402
+from ia import sondar_ia                                 # noqa: E402
+from dependencias import dependencias_fantasma           # noqa: E402
 from ferramentas_externas import gitleaks, osv, semgrep, testssl, trivy  # noqa: E402
 
 # a ordem define a execução e o relatório. O crawler (rastreio) e o recon vêm antes da injeção porque a alimentam.
@@ -554,6 +556,7 @@ SONDAS = [
     ('graphql', graphql),
     ('oauth', oauth_sso),
     ('websocket', websocket),
+    ('ia', sondar_ia),
     ('autenticacao', autenticacao),
     ('autenticado', varredura_autenticada),
     ('logica', testes_de_logica),
@@ -567,6 +570,7 @@ SONDAS = [
     ('osv', osv),
     ('trivy', trivy),
     ('testssl', testssl),
+    ('dependencias', dependencias_fantasma),
 ]
 
 
