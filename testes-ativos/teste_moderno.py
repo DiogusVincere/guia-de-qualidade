@@ -257,11 +257,16 @@ class TestNavegador(unittest.TestCase):
         cls.srv.shutdown(); cls.srv.server_close()
 
     def test_sem_playwright_avisa(self):
-        if _playwright_ok():
-            self.skipTest('Playwright instalado; o aviso de ausência não se aplica')
-        alvo = Alvo(self.url, ambiente='local', intensidade=1, autorizado=True)
-        achados = navegador.rastreio_navegador(alvo)
-        self.assertTrue(any('Playwright' in a.evidencia or 'Playwright' in a.correcao for a in achados))
+        # força o caminho "sem Playwright" (roda em qualquer máquina, com ou sem o navegador instalado)
+        orig = navegador._playwright_ok
+        navegador._playwright_ok = lambda: False
+        try:
+            alvo = Alvo(self.url, ambiente='local', intensidade=1, autorizado=True)
+            achados = navegador.rastreio_navegador(alvo)
+        finally:
+            navegador._playwright_ok = orig
+        texto = ' '.join(a.titulo + ' ' + a.correcao for a in achados).lower()
+        self.assertIn('playwright', texto)
 
     @unittest.skipUnless(_playwright_ok(), 'precisa do Playwright')
     def test_com_playwright_mapeia(self):
