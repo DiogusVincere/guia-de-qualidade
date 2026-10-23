@@ -533,6 +533,7 @@ from sondas_app import dom_xss, oauth_sso, websocket     # noqa: E402
 from sondas_recon import csrf, prototype_pollution, recon_passivo  # noqa: E402
 from ia import sondar_ia                                 # noqa: E402
 from dependencias import dependencias_fantasma           # noqa: E402
+from agente_config import config_de_agente               # noqa: E402
 from ferramentas_externas import gitleaks, osv, semgrep, testssl, trivy  # noqa: E402
 
 # a ordem define a execução e o relatório. O crawler (rastreio) e o recon vêm antes da injeção porque a alimentam.
@@ -571,6 +572,7 @@ SONDAS = [
     ('trivy', trivy),
     ('testssl', testssl),
     ('dependencias', dependencias_fantasma),
+    ('agente', config_de_agente),
 ]
 
 

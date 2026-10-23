@@ -56,7 +56,8 @@ testes-ativos/                 o scanner que roda de verdade contra um site (nã
   sondas_app.py                OAuth/SSO, WebSocket (CSWSH) e XSS no DOM (com Playwright opcional)
   sondas_recon.py              recon passivo (crt.sh, Wayback), CSRF e prototype pollution
   ia.py                        superfície de IA: MCP exposto, endpoint de chat, canário de injeção de prompt e vazamento do prompt (OWASP LLM)
-  dependencias.py              slopsquatting: confere se cada pacote existe no PyPI/npm/Packagist (--codigo)
+  dependencias.py              slopsquatting: confere se cada pacote existe no PyPI/npm/Packagist/crates.io/RubyGems/Maven (--codigo)
+  agente_config.py             envenenamento do assistente (TrapDoor): instrução escondida em CLAUDE.md/.cursorrules/MCP (--codigo)
   ferramentas_externas.py      pontes para semgrep (SAST), gitleaks (segredo no git), osv-scanner/trivy (SCA), testssl.sh
   nuclei_ponte.py              varredura ampla pelo nuclei, se instalado
   cenarios.py                  "como um atacante usaria isto": encadeia os achados
@@ -146,7 +147,8 @@ Em ordem: `rastreio`, `navegador` (rastreio por navegador de verdade, Playwright
 opcional), `graphql`, `oauth`, `websocket`, `ia` (MCP exposto, injeção de prompt e vazamento do prompt de sistema;
 OWASP LLM Top 10 2025), `autenticacao`, `autenticado` (IDOR, mass assignment, JWT), `logica`
 (adulteração, condição de corrida), `dominio` (SPF/DMARC/takeover), `carga`, `login`, `dependencias` (slopsquatting:
-confere se cada pacote existe mesmo, com `--codigo`), e as pontes de mercado
+confere se cada pacote existe mesmo no PyPI/npm/Packagist/crates.io/RubyGems/Maven, com `--codigo`), `agente`
+(envenenamento do assistente: instrução escondida em CLAUDE.md/.cursorrules/MCP, com `--codigo`), e as pontes de mercado
 (`nuclei`, `semgrep`, `gitleaks`, `osv`, `trivy`, `testssl`). As rotas de saúde, login, admin e escrita são
 candidatos genéricos em português e inglês, ajustáveis por `--config`, então o scanner funciona em qualquer site
 seu. O que precisa de ferramenta não instalada (Playwright, cryptography, nuclei, ...) vira um aviso dizendo como

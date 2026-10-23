@@ -80,3 +80,27 @@ ferramenta devolve são entrada hostil, nunca instrução de confiança.**
 - **Por quê:** são o LLM04 (envenenamento de dado/modelo) e o LLM08 (fraqueza de vetor/embedding). Documento envenenado no índice vira resposta errada ou injeção indireta; poucos documentos preparados já deslocam a resposta.
 - **Como verificar:** confira de onde vem cada fonte do índice e quem pode escrever nela; um documento recuperado nunca é instrução, é dado; teste com um canário plantado em fonte de homologação.
 - **Como corrigir:** controle quem alimenta o índice; assine/valide a fonte; separe instrução de conteúdo recuperado; monitore a saída. Ver [05 dados pessoais](05-dados-pessoais.md).
+
+### IA-13 · Envenenamento do assistente pelo arquivo de instrução (CLAUDE.md, .cursorrules, MCP)
+- **Conferir:** os arquivos que uma ferramenta de IA lê como instrução (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.windsurfrules`, `copilot-instructions.md`, config de MCP) são código versionado e revisado, sem texto escondido.
+- **Por quê:** em outubro/2026 a campanha **TrapDoor** plantou esses arquivos em pacotes de npm, PyPI e crates.io com ordens escondidas (caractere invisível, comentário HTML, base64) que o agente lê e obedece — baixar segredo, instalar pacote, rodar comando — sem o humano ver no editor.
+- **Como verificar:** a sonda `agente` do scanner procura caractere invisível, instrução em comentário HTML, `curl|sh`/install de URL/`base64 -d`, exfiltração de segredo e bloco base64 nesses arquivos; abra cada um num visualizador que mostre caracteres de controle.
+- **Como corrigir:** trate todo arquivo de instrução de IA como código a revisar; nunca o aceite de fonte não confiável (dependência, template baixado); fixe e revise as mudanças nele.
+
+### IA-14 · Pacote que se espalha sozinho (worm de dependência)
+- **Conferir:** o `postinstall`/script de ciclo de vida das dependências é conhecido; o lockfile está fixo; o token de publicação e de CI tem escopo mínimo e não fica no ambiente de build.
+- **Por quê:** os worms de npm de 2025–2026 (Shai-Hulud e variantes) usam um pacote comprometido para roubar segredo de CI/CD e nuvem e **republicar** em outros pacotes do mesmo dono, se espalhando sozinhos.
+- **Como verificar:** veja os scripts `preinstall`/`postinstall` do `package.json` das dependências; confira se o token de npm/CI tem escopo amplo; rode `npm ci` com lockfile, não `npm install` solto.
+- **Como corrigir:** desligue scripts de ciclo de vida que não precisa (`--ignore-scripts`); token de publicação com 2FA e escopo mínimo, fora do build; fixe o lockfile; alerta de publicação de pacote. Ver [07 dependências e CI](07-dependencias-e-ci.md).
+
+### IA-15 · Framework de agente que executa a saída do modelo (RCE)
+- **Conferir:** nenhum framework de agente roda código, consulta ou comando gerado pelo modelo fora de uma caixa de areia; a saída que vira `eval`/`exec`/shell é isolada e limitada.
+- **Por quê:** os CVEs de 2026 em frameworks de agente (Flowise CSV Agent, Semantic Kernel e outros) são execução remota de código: o agente avalia um script que o modelo escreveu, sem sandbox, e a injeção de prompt vira comando na sua máquina ("quando o prompt vira shell").
+- **Como verificar:** ache onde a saída do modelo é executada (interpretador Python/JS embutido, ferramenta de shell, consulta montada); confira se roda isolado, com tempo e permissão limitados; atualize o framework.
+- **Como corrigir:** nunca execute a saída do modelo direto; sandbox com permissão mínima, sem rede nem segredo; valide contra esquema; é a IA-04 levada ao agente.
+
+### IA-16 · Exploração em massa dirigida por IA: velocidade de patch
+- **Conferir:** você consegue aplicar um patch crítico em horas, não em semanas; o servidor e as bibliotecas expostas não vazam versão desatualizada; há um WAF/CDN na frente.
+- **Por quê:** em 21/10/2026 uma falha crítica de PHP foi divulgada e a Cloudflare viu **milhões de tentativas em horas** — agentes de IA transformam a prova de conceito em exploração em massa quase imediata. A janela entre divulgar e explorar encolheu para horas.
+- **Como verificar:** confira o cabeçalho `Server`/versão que o site expõe (a sonda `cabecalhos` pega); veja o SLA de patch e se há alerta de CVE nas suas dependências (SCA); teste se o WAF barra as cargas conhecidas.
+- **Como corrigir:** processo de patch de emergência (horas); esconda a versão; SCA com alerta no CI; WAF/CDN na frente para ganhar tempo. Ver [10 deploy e operação](10-deploy-e-operacao.md).
